@@ -12,7 +12,7 @@ export interface ApiResponse<T> {
 
 /**
  * Simulated network delay so loading states are visible during demos.
- * Remove or set to 0 once the real backend is connected.
+ * Remove or set to 0 once the renal backend is connected.
  */
 const MOCK_DELAY_MS = 600;
 

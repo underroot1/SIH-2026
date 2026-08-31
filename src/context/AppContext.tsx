@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from 'react';
 import { type Language, type TextScale } from '@/data/mockData';
+import i18n from '@/i18n';
 
 export type Route =
   | 'my-day'
@@ -66,6 +67,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     root.classList.remove('text-scale-1', 'text-scale-2', 'text-scale-3', 'text-scale-4');
     root.classList.add(`text-scale-${textScale}`);
   }, [textScale]);
+
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language]);
 
   const navigate = (newRoute: Route, newParams: Record<string, string> = {}) => {
     setHistory((h) => [...h, route]);

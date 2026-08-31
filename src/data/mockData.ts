@@ -8,7 +8,6 @@ export const LANGUAGES: { code: Language; label: string; nativeLabel: string }[]
 ];
 
 export type TextScale = 1 | 2 | 3 | 4;
-
 export interface Reminder {
   id: string;
   type: 'medicine' | 'meal' | 'appointment' | 'activity' | 'call' | 'task';

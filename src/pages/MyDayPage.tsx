@@ -1,5 +1,6 @@
 import { useApp } from '@/context/AppContext';
 import { useReminders } from '@/hooks/useReminders';
+import { useTranslation } from 'react-i18next';
 import {
   Calendar,
   Brain,
@@ -15,15 +16,16 @@ import { useState } from 'react';
 import { SuccessToast, LoadingState, ErrorState } from '@/components/UI';
 
 export function MyDayPage() {
+  const { t, i18n } = useTranslation();
   const { patientName, navigate } = useApp();
   const { reminders, loading, error, completeReminder, refresh } = useReminders();
   const [showSuccess, setShowSuccess] = useState(false);
 
   const now = new Date();
   const hour = now.getHours();
-  const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
-  const todayName = now.toLocaleDateString('en-US', { weekday: 'long' });
-  const dateStr = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+  const greeting = hour < 12 ? t('greetingMorning') : hour < 17 ? t('greetingAfternoon') : t('greetingEvening');
+  const todayName = now.toLocaleDateString(i18n.language, { weekday: 'long' });
+  const dateStr = now.toLocaleDateString(i18n.language, { month: 'long', day: 'numeric' });
 
   const nextReminder = reminders.find((r) => !r.done);
   const upcoming = reminders.filter((r) => !r.done && r.id !== nextReminder?.id).slice(0, 2);
@@ -36,11 +38,11 @@ export function MyDayPage() {
   };
 
   const mainActions = [
-    { route: 'my-day' as const, label: 'My Day', desc: 'See what I need to do today.', icon: Calendar, color: 'bg-honey-100 text-honey-700' },
-    { route: 'play' as const, label: 'Play a Game', desc: 'Enjoy a simple activity.', icon: Brain, color: 'bg-sage-100 text-sage-700' },
-    { route: 'memories' as const, label: 'My Memories', desc: 'Look at special memories.', icon: Images, color: 'bg-coral-100 text-coral-700' },
-    { route: 'people' as const, label: 'My People', desc: 'See important people in my life.', icon: Users, color: 'bg-cream-200 text-ink-700' },
-    { route: 'help' as const, label: 'I Need Help', desc: 'Get help quickly.', icon: LifeBuoy, color: 'bg-coral-100 text-coral-700' },
+    { route: 'my-day' as const, label: t('actionMyDayLabel'), desc: t('actionMyDayDesc'), icon: Calendar, color: 'bg-honey-100 text-honey-700' },
+    { route: 'play' as const, label: t('actionPlayLabel'), desc: t('actionPlayDesc'), icon: Brain, color: 'bg-sage-100 text-sage-700' },
+    { route: 'memories' as const, label: t('actionMemoriesLabel'), desc: t('actionMemoriesDesc'), icon: Images, color: 'bg-coral-100 text-coral-700' },
+    { route: 'people' as const, label: t('actionPeopleLabel'), desc: t('actionPeopleDesc'), icon: Users, color: 'bg-cream-200 text-ink-700' },
+    { route: 'help' as const, label: t('actionHelpLabel'), desc: t('actionHelpDesc'), icon: LifeBuoy, color: 'bg-coral-100 text-coral-700' },
   ];
 
   return (
@@ -54,11 +56,11 @@ export function MyDayPage() {
           {greeting}, {patientName} ❤️
         </h1>
         <p className="text-xl text-ink-500 font-semibold">
-          Today is {todayName}, {dateStr}
+          {t('todayIs')} {todayName}, {dateStr}
         </p>
       </div>
 
-      {loading && <LoadingState message="Getting your day ready..." />}
+      {loading && <LoadingState message={t('loadingDay')} />}
 
       {error && <ErrorState message={error} onRetry={refresh} />}
 
@@ -72,7 +74,7 @@ export function MyDayPage() {
                   <Pill className="w-8 h-8 text-honey-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-honey-600 uppercase tracking-wide">Time to take your medicine</p>
+                  <p className="text-sm font-bold text-honey-600 uppercase tracking-wide">{t('medicineTimeLabel')}</p>
                   <p className="text-3xl font-display font-extrabold text-ink-800">{nextReminder.time}</p>
                 </div>
               </div>
@@ -80,11 +82,11 @@ export function MyDayPage() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <button onClick={handleComplete} className="btn-success flex-1 text-xl">
                   <Check className="w-7 h-7" />
-                  I Took My Medicine
+                  {t('tookMedicine')}
                 </button>
                 <button className="btn-secondary flex-1">
                   <Clock className="w-6 h-6" />
-                  Remind Me Later
+                  {t('remindLater')}
                 </button>
               </div>
             </div>
@@ -93,15 +95,15 @@ export function MyDayPage() {
               <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-sage-100 flex items-center justify-center">
                 <Check className="w-9 h-9 text-sage-600" />
               </div>
-              <p className="text-2xl font-display font-extrabold text-ink-800 mb-1">All done for now! ⭐</p>
-              <p className="text-lg text-ink-500">You have finished all your tasks. Enjoy your day!</p>
+              <p className="text-2xl font-display font-extrabold text-ink-800 mb-1">{t('allDoneTitle')}</p>
+              <p className="text-lg text-ink-500">{t('allDoneDesc')}</p>
             </div>
           )}
 
           {/* Upcoming */}
           {upcoming.length > 0 && (
             <div className="mb-8">
-              <p className="text-lg font-bold text-ink-600 mb-3 px-1">Coming up next:</p>
+              <p className="text-lg font-bold text-ink-600 mb-3 px-1">{t('comingUpNext')}</p>
               <div className="grid sm:grid-cols-2 gap-3">
                 {upcoming.map((r) => (
                   <div key={r.id} className="card-base p-4 flex items-center gap-3">
@@ -144,7 +146,7 @@ export function MyDayPage() {
 
       {showSuccess && (
         <SuccessToast
-          message="You completed this task ⭐"
+          message={t('taskCompletedToast')}
           onClose={() => setShowSuccess(false)}
         />
       )}
