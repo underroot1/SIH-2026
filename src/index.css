@@ -13,6 +13,19 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Kept as plain CSS here (not inside @layer components) and placed
+   after :root. Tailwind injects everything inside @layer components
+   at the position of the `@tailwind components;` directive above —
+   i.e. earlier in the compiled file than this plain :root rule. With
+   equal specificity, the later rule in the file wins, so :root's
+   100% was silently overriding .text-scale-1/3/4 and the A-/A+
+   buttons had no visible effect. Placing these rules here, after
+   :root, makes them win instead. */
+.text-scale-1 { --base-font: 93.75%; }
+.text-scale-2 { --base-font: 100%; }
+.text-scale-3 { --base-font: 112.5%; }
+.text-scale-4 { --base-font: 125%; }
+
 body {
   background-color: #FAF6EF;
   color: #2D2722;
@@ -43,11 +56,6 @@ body {
 }
 
 @layer components {
-  .text-scale-1 { --base-font: 93.75%; }
-  .text-scale-2 { --base-font: 100%; }
-  .text-scale-3 { --base-font: 112.5%; }
-  .text-scale-4 { --base-font: 125%; }
-
   .card-base {
     @apply bg-white rounded-3xl shadow-card transition-all duration-300;
   }

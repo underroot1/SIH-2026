@@ -2,10 +2,12 @@ import { useApp } from '@/context/AppContext';
 import { LANGUAGES, type Language } from '@/data/mockData';
 import { useState } from 'react';
 import { UserPlus, Eye, EyeOff, Check, ChevronDown, Globe } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 export function SignUpPage() {
-  const { navigate, setAuthState, setOnboardingStep, setPatientName, language, setLanguage } = useApp();
+  const { navigate, setOnboardingStep, setPatientName, language, setLanguage } = useApp();
   const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
   const [preferredLanguage, setPreferredLanguage] = useState<Language>(language);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -13,11 +15,19 @@ export function SignUpPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setSuccess('');
     if (!fullName.trim()) {
       setError('Please enter your full name.');
+      return;
+    }
+    if (!email.trim()) {
+      setError('Please enter your email.');
       return;
     }
     if (!password) {
@@ -28,15 +38,37 @@ export function SignUpPage() {
       setError('Your passwords do not match. Please try again.');
       return;
     }
-    if (password.length < 4) {
-      setError('Your password is too short. Please use at least 4 characters.');
+    if (password.length < 6) {
+      setError('Your password is too short. Please use at least 6 characters.');
       return;
     }
-    setPatientName(fullName.trim());
+
+    setLoading(true);
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: { data: { full_name: fullName.trim() } },
+    });
+    setLoading(false);
+
+    if (signUpError) {
+      setError(signUpError.message);
+      return;
+    }
+
     setLanguage(preferredLanguage);
-    setAuthState('onboarding');
-    setOnboardingStep(0);
-    navigate('onboarding');
+
+    if (data.session) {
+      // Email confirmation is off for this project — the account is
+      // ready to use right away. Set the name immediately so the
+      // onboarding screens don't wait on the profile row to load.
+      setPatientName(fullName.trim());
+      setOnboardingStep(0);
+      navigate('onboarding');
+    } else {
+      // Email confirmation is required before a session is issued.
+      setSuccess('Account created! Please check your email to confirm your account, then log in.');
+    }
   };
 
   const currentLang = LANGUAGES.find((l) => l.code === preferredLanguage);
@@ -60,6 +92,18 @@ export function SignUpPage() {
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
+              className="w-full rounded-2xl border-2 border-cream-300 bg-white px-5 py-4 text-lg focus:border-honey-400 focus:outline-none transition"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="signupEmail" className="block text-lg font-bold text-ink-700 mb-2">Email</label>
+            <input
+              id="signupEmail"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-2xl border-2 border-cream-300 bg-white px-5 py-4 text-lg focus:border-honey-400 focus:outline-none transition"
             />
           </div>
@@ -108,6 +152,7 @@ export function SignUpPage() {
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full rounded-2xl border-2 border-cream-300 bg-white px-5 py-4 pr-14 text-lg focus:border-honey-400 focus:outline-none transition"
@@ -129,6 +174,7 @@ export function SignUpPage() {
               <input
                 id="confirmPassword"
                 type={showConfirm ? 'text' : 'password'}
+                autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full rounded-2xl border-2 border-cream-300 bg-white px-5 py-4 pr-14 text-lg focus:border-honey-400 focus:outline-none transition"
@@ -147,10 +193,13 @@ export function SignUpPage() {
           {error && (
             <p className="text-coral-600 font-semibold text-base bg-coral-50 rounded-xl px-4 py-3">{error}</p>
           )}
+          {success && (
+            <p className="text-sage-700 font-semibold text-base bg-sage-50 rounded-xl px-4 py-3">{success}</p>
+          )}
 
-          <button type="submit" className="btn-primary w-full text-xl">
+          <button type="submit" disabled={loading} className="btn-primary w-full text-xl">
             <UserPlus className="w-6 h-6" />
-            Create Account
+            {loading ? 'Creating account…' : 'Create Account'}
           </button>
         </form>
 

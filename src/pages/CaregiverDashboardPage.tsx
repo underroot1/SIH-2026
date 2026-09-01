@@ -43,7 +43,7 @@ const reminderTypeIcons: Record<string, typeof Pill> = {
 };
 
 export function CaregiverDashboardPage() {
-  const { setCaregiverMode, navigate, patientName } = useApp();
+  const { setCaregiverMode, navigate, patientName, signOut } = useApp();
   const remindersHook = useReminders();
   const memoriesHook = useMemories();
   const peopleHook = usePeople();
@@ -79,10 +79,18 @@ export function CaregiverDashboardPage() {
               <p className="text-ink-400 text-sm leading-tight">Helping {patientName} with their day</p>
             </div>
           </div>
-          <button onClick={handleExit} className="btn-secondary text-base px-5 py-3">
-            <LogOut className="w-5 h-5" />
-            <span className="hidden sm:inline">Back to My Day</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={handleExit} className="btn-secondary text-base px-5 py-3">
+              <LogOut className="w-5 h-5" />
+              <span className="hidden sm:inline">Back to My Day</span>
+            </button>
+            <button
+              onClick={signOut}
+              className="text-ink-400 font-semibold text-sm hover:text-coral-600 transition px-2"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}

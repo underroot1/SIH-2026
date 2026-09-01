@@ -1,26 +1,40 @@
 import { useApp } from '@/context/AppContext';
 import { useState } from 'react';
 import { LogIn, Eye, EyeOff, Sun } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 export function LoginPage() {
-  const { navigate, setAuthState, setPatientName } = useApp();
-  const [fullName, setFullName] = useState('');
+  const { navigate } = useApp();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim()) {
-      setError('Please enter your full name.');
+    setError('');
+    if (!email.trim()) {
+      setError('Please enter your email.');
       return;
     }
     if (!password) {
       setError('Please enter your password.');
       return;
     }
-    setPatientName(fullName.trim());
-    setAuthState('authenticated');
+
+    setLoading(true);
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+    setLoading(false);
+
+    if (signInError) {
+      setError(signInError.message);
+      return;
+    }
+
     navigate('my-day');
   };
 
@@ -37,12 +51,13 @@ export function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="loginName" className="block text-lg font-bold text-ink-700 mb-2">Your Name</label>
+            <label htmlFor="loginEmail" className="block text-lg font-bold text-ink-700 mb-2">Email</label>
             <input
-              id="loginName"
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              id="loginEmail"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-2xl border-2 border-cream-300 bg-white px-5 py-4 text-lg focus:border-honey-400 focus:outline-none transition"
             />
           </div>
@@ -53,6 +68,7 @@ export function LoginPage() {
               <input
                 id="loginPassword"
                 type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full rounded-2xl border-2 border-cream-300 bg-white px-5 py-4 pr-14 text-lg focus:border-honey-400 focus:outline-none transition"
@@ -72,9 +88,9 @@ export function LoginPage() {
             <p className="text-coral-600 font-semibold text-base bg-coral-50 rounded-xl px-4 py-3">{error}</p>
           )}
 
-          <button type="submit" className="btn-primary w-full text-xl">
+          <button type="submit" disabled={loading} className="btn-primary w-full text-xl">
             <LogIn className="w-6 h-6" />
-            Log In
+            {loading ? 'Logging in…' : 'Log In'}
           </button>
         </form>
 

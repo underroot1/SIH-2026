@@ -14,7 +14,15 @@ import { OnboardingPage } from '@/pages/OnboardingPage';
 import { CaregiverDashboardPage } from '@/pages/CaregiverDashboardPage';
 
 function AppRouter() {
-  const { route } = useApp();
+  const { route, authLoading } = useApp();
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-cream-100 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full border-4 border-honey-200 border-t-honey-500 animate-spin" />
+      </div>
+    );
+  }
 
   if (route === 'signup') return <SignUpPage />;
   if (route === 'login') return <LoginPage />;

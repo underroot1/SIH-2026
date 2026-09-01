@@ -7,6 +7,8 @@ import {
 } from 'react';
 import { type Language, type TextScale } from '@/data/mockData';
 import i18n from '@/i18n';
+import { supabase } from '@/lib/supabaseClient';
+import type { Session } from '@supabase/supabase-js';
 
 export type Route =
   | 'my-day'
@@ -46,6 +48,9 @@ interface AppState {
   setOnboardingStep: (step: OnboardingStep) => void;
   isCaregiverMode: boolean;
   setCaregiverMode: (val: boolean) => void;
+  session: Session | null;
+  authLoading: boolean;
+  signOut: () => Promise<void>;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -57,10 +62,59 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>('en');
   const [textScale, setTextScale] = useState<TextScale>(2);
   const [activeReminderId, setActiveReminderId] = useState<string | null>(null);
-  const [patientName, setPatientName] = useState('Amar');
+  const [patientName, setPatientName] = useState('');
   const [authState, setAuthState] = useState<AuthState>('guest');
   const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(0);
   const [isCaregiverMode, setIsCaregiverMode] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Pull the display name from the profiles table (created automatically
+  // on signup by a DB trigger — see supabase/schema.sql).
+  const loadProfile = async (userId: string, fallbackName?: string) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', userId)
+      .maybeSingle();
+    if (data?.full_name) {
+      setPatientName(data.full_name);
+    } else if (fallbackName) {
+      setPatientName(fallbackName);
+    }
+  };
+
+  // Check for an existing session on load, then keep it in sync.
+  useEffect(() => {
+    let active = true;
+
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      if (!active) return;
+      setSession(initialSession);
+      if (initialSession) {
+        setAuthState('authenticated');
+        setRoute('my-day');
+        loadProfile(initialSession.user.id, initialSession.user.user_metadata?.full_name);
+      }
+      setAuthLoading(false);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      if (newSession) {
+        setAuthState((prev) => (prev === 'onboarding' ? prev : 'authenticated'));
+        loadProfile(newSession.user.id, newSession.user.user_metadata?.full_name);
+      } else {
+        setAuthState('guest');
+        setPatientName('');
+      }
+    });
+
+    return () => {
+      active = false;
+      listener.subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -92,6 +146,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setIsCaregiverMode(false);
+    setHistory([]);
+    setRoute('login');
+  };
+
   const value: AppState = {
     route,
     navigate,
@@ -112,6 +173,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setOnboardingStep,
     isCaregiverMode,
     setCaregiverMode: setIsCaregiverMode,
+    session,
+    authLoading,
+    signOut,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
