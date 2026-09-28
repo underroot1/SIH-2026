@@ -1,7 +1,7 @@
 import { useApp } from '@/context/AppContext';
 import { LANGUAGES, type Language } from '@/data/mockData';
 import { useState } from 'react';
-import { UserPlus, Eye, EyeOff, Check, ChevronDown, Globe } from 'lucide-react';
+import { UserPlus, Eye, EyeOff, Check, ChevronDown, Globe, Sparkles } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
 export function SignUpPage() {
@@ -212,6 +212,26 @@ export function SignUpPage() {
             Log in
           </button>
         </div>
+
+        {/* Divider */}
+        <div className="relative my-6 text-center">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-cream-300" />
+          </div>
+          <span className="relative bg-white px-3 text-sm text-ink-400 font-semibold">or explore first</span>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate('demo')}
+          className="w-full bg-cream-100 hover:bg-cream-200 text-ink-700 font-bold py-3 px-3 rounded-2xl flex items-center justify-center gap-1.5 text-sm transition"
+        >
+          <Sparkles className="w-4 h-4 text-honey-600" />
+          Take the Interactive Feature Tour
+        </button>
+        <p className="text-center text-xs text-ink-400 mt-2">
+          Tour is read-only — sign up above to get full access.
+        </p>
       </div>
     </div>
   );

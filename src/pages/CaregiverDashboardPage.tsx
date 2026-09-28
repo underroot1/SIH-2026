@@ -2,7 +2,7 @@ import { useApp } from '@/context/AppContext';
 import { useReminders } from '@/hooks/useReminders';
 import { useMemories } from '@/hooks/useMemories';
 import { usePeople } from '@/hooks/usePeople';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   LayoutDashboard,
   Bell,
@@ -19,7 +19,9 @@ import {
   CalendarClock,
   PhoneCall,
   Gamepad2,
-  Sparkles,
+  Upload,
+  Camera,
+  X,
 } from 'lucide-react';
 import { LoadingState, ErrorState, EmptyState } from '@/components/UI';
 
@@ -334,17 +336,40 @@ function MemoriesTab({
   refresh: () => void;
 }) {
   const [title, setTitle] = useState('');
-  const [year, setYear] = useState('');
+  const [year, setYear] = useState(new Date().getFullYear().toString());
   const [description, setDescription] = useState('');
   const [caption, setCaption] = useState('');
   const [detail, setDetail] = useState('');
+  const [photoPreview, setPhotoPreview] = useState('');
+  const [saving, setSaving] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setPhotoPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title) return;
-    addMemory({ title, year: year || new Date().getFullYear().toString(), description: description || title, image: 'family-wedding', caption: caption || `This is ${title}`, detail: detail || description });
-    setTitle(''); setYear(''); setDescription(''); setCaption(''); setDetail('');
+    if (!title.trim()) return;
+    setSaving(true);
+    await addMemory({
+      title: title.trim(),
+      year: year || new Date().getFullYear().toString(),
+      description: description.trim() || title.trim(),
+      image: photoPreview || 'family-wedding',
+      caption: caption.trim() || title.trim(),
+      detail: detail.trim() || description.trim() || title.trim(),
+    });
+    setSaving(false);
+    setTitle(''); setYear(new Date().getFullYear().toString());
+    setDescription(''); setCaption(''); setDetail('');
+    setPhotoPreview('');
     setShowForm(false);
+    refresh();
   };
 
   return (
@@ -357,10 +382,49 @@ function MemoriesTab({
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="card-base p-6 mb-6 space-y-4 animate-scaleIn">
+        <form onSubmit={handleSubmit} className="card-base p-6 mb-6 space-y-4 animate-scaleIn border-2 border-honey-200">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-ink-800 text-lg flex items-center gap-2"><Images className="w-5 h-5 text-coral-500" /> New Memory</h3>
+            <button type="button" onClick={() => setShowForm(false)} className="w-8 h-8 rounded-full bg-cream-100 hover:bg-cream-200 flex items-center justify-center text-ink-400">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Photo Upload */}
+          <div>
+            <label className="block text-base font-bold text-ink-700 mb-2 flex items-center gap-1.5">
+              <Camera className="w-4 h-4" /> Photo for the Patient
+            </label>
+            <div
+              onClick={() => fileRef.current?.click()}
+              className="cursor-pointer border-2 border-dashed border-cream-300 rounded-xl overflow-hidden hover:border-honey-400 hover:bg-honey-50 transition"
+              style={{ minHeight: '120px' }}
+            >
+              {photoPreview ? (
+                <div className="relative">
+                  <img src={photoPreview} alt="Preview" className="w-full h-48 object-cover" />
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setPhotoPreview(''); }}
+                    className="absolute top-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center text-ink-600 hover:bg-coral-100 shadow"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-2 py-8">
+                  <Upload className="w-8 h-8 text-ink-300" />
+                  <p className="text-ink-400 text-sm font-semibold">Click to upload a photo from your device</p>
+                  <p className="text-ink-300 text-xs">JPG, PNG, WEBP — shown to the patient</p>
+                </div>
+              )}
+            </div>
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
+          </div>
+
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-base font-bold text-ink-700 mb-1.5">Title</label>
+              <label className="block text-base font-bold text-ink-700 mb-1.5">Title *</label>
               <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Priya's Wedding" className="w-full rounded-xl border-2 border-cream-300 bg-white px-4 py-3 text-base focus:border-honey-400 focus:outline-none" />
             </div>
             <div>
@@ -369,34 +433,45 @@ function MemoriesTab({
             </div>
           </div>
           <div>
-            <label className="block text-base font-bold text-ink-700 mb-1.5">Description</label>
-            <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="A short summary" className="w-full rounded-xl border-2 border-cream-300 bg-white px-4 py-3 text-base focus:border-honey-400 focus:outline-none" />
+            <label className="block text-base font-bold text-ink-700 mb-1.5">Short Description</label>
+            <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="A short summary of this memory" className="w-full rounded-xl border-2 border-cream-300 bg-white px-4 py-3 text-base focus:border-honey-400 focus:outline-none" />
           </div>
           <div>
-            <label className="block text-base font-bold text-ink-700 mb-1.5">Caption (shown to patient)</label>
-            <input value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="e.g. This is your daughter Priya ❤️" className="w-full rounded-xl border-2 border-cream-300 bg-white px-4 py-3 text-base focus:border-honey-400 focus:outline-none" />
+            <label className="block text-base font-bold text-ink-700 mb-1.5">Caption (headline shown to patient)</label>
+            <input value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="e.g. You were so proud watching Priya graduate! ❤️" className="w-full rounded-xl border-2 border-cream-300 bg-white px-4 py-3 text-base focus:border-honey-400 focus:outline-none" />
           </div>
           <div>
-            <label className="block text-base font-bold text-ink-700 mb-1.5">Detail (story)</label>
-            <textarea value={detail} onChange={(e) => setDetail(e.target.value)} placeholder="A longer description of the memory" rows={3} className="w-full rounded-xl border-2 border-cream-300 bg-white px-4 py-3 text-base focus:border-honey-400 focus:outline-none resize-none" />
+            <label className="block text-base font-bold text-ink-700 mb-1.5">Full Story (shown to patient)</label>
+            <textarea value={detail} onChange={(e) => setDetail(e.target.value)} placeholder="Tell the full story of this memory in warm, comforting words…" rows={3} className="w-full rounded-xl border-2 border-cream-300 bg-white px-4 py-3 text-base focus:border-honey-400 focus:outline-none resize-none" />
           </div>
-          <button type="submit" className="btn-success text-base px-6 py-3"><Check className="w-5 h-5" /> Save Memory</button>
+          <div className="flex gap-3">
+            <button type="submit" disabled={saving} className="btn-success text-base px-6 py-3 flex-1">
+              <Check className="w-5 h-5" /> {saving ? 'Saving…' : 'Save Memory'}
+            </button>
+            <button type="button" onClick={() => setShowForm(false)} className="btn-secondary text-base px-5 py-3">
+              Cancel
+            </button>
+          </div>
         </form>
       )}
 
       {loading && <LoadingState message="Loading memories..." />}
       {error && <ErrorState message={error} onRetry={refresh} />}
       {!loading && !error && memories.length === 0 && (
-        <EmptyState icon={<Images className="w-10 h-10" />} title="No memories yet" message="Add a memory to help your loved one revisit special moments." />
+        <EmptyState icon={<Images className="w-10 h-10" />} title="No memories yet" message="Add a memory with a real photo to help your loved one revisit special moments." />
       )}
 
       {!loading && !error && memories.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {memories.map((m) => (
             <div key={m.id} className="card-base overflow-hidden">
-              <div className="w-full aspect-[4/3] bg-gradient-to-br from-honey-200 to-honey-400 flex items-center justify-center">
-                <Sparkles className="w-12 h-12 text-honey-700" />
-              </div>
+              {m.image && m.image.startsWith('data:') ? (
+                <img src={m.image} alt={m.title} className="w-full aspect-[4/3] object-cover" />
+              ) : (
+                <div className="w-full aspect-[4/3] bg-gradient-to-br from-honey-200 to-honey-400 flex items-center justify-center">
+                  <Images className="w-12 h-12 text-honey-700" />
+                </div>
+              )}
               <div className="p-4">
                 <p className="font-bold text-ink-800 text-lg leading-tight">{m.title}</p>
                 <p className="text-ink-400 text-sm">{m.year}</p>
@@ -425,13 +500,34 @@ function PeopleTab({
   const [relationship, setRelationship] = useState('');
   const [info, setInfo] = useState('');
   const [phone, setPhone] = useState('');
+  const [photoPreview, setPhotoPreview] = useState('');
+  const [saving, setSaving] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setPhotoPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return;
-    addPerson({ name, relationship: relationship || 'Family', image: 'priya', info: info || `${name} is important to you.`, phone: phone || 'N/A' });
+    if (!name.trim()) return;
+    setSaving(true);
+    await addPerson({
+      name: name.trim(),
+      relationship: relationship.trim() || 'Family',
+      image: photoPreview || 'person',
+      info: info.trim() || `${name.trim()} is important to you.`,
+      phone: phone.trim() || 'N/A',
+    });
+    setSaving(false);
     setName(''); setRelationship(''); setInfo(''); setPhone('');
+    setPhotoPreview('');
     setShowForm(false);
+    refresh();
   };
 
   return (
@@ -444,11 +540,50 @@ function PeopleTab({
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="card-base p-6 mb-6 space-y-4 animate-scaleIn">
+        <form onSubmit={handleSubmit} className="card-base p-6 mb-6 space-y-4 animate-scaleIn border-2 border-honey-200">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-ink-800 text-lg flex items-center gap-2"><Users className="w-5 h-5 text-honey-500" /> New Person</h3>
+            <button type="button" onClick={() => setShowForm(false)} className="w-8 h-8 rounded-full bg-cream-100 hover:bg-cream-200 flex items-center justify-center text-ink-400">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Photo Upload */}
+          <div>
+            <label className="block text-base font-bold text-ink-700 mb-2 flex items-center gap-1.5">
+              <Camera className="w-4 h-4" /> Their Photo
+            </label>
+            <div
+              onClick={() => fileRef.current?.click()}
+              className="cursor-pointer border-2 border-dashed border-cream-300 rounded-xl overflow-hidden hover:border-honey-400 hover:bg-honey-50 transition"
+              style={{ minHeight: '120px' }}
+            >
+              {photoPreview ? (
+                <div className="relative">
+                  <img src={photoPreview} alt="Preview" className="w-full h-48 object-cover object-top" />
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setPhotoPreview(''); }}
+                    className="absolute top-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center text-ink-600 hover:bg-coral-100 shadow"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-2 py-8">
+                  <Upload className="w-8 h-8 text-ink-300" />
+                  <p className="text-ink-400 text-sm font-semibold">Click to upload a photo of this person</p>
+                  <p className="text-ink-300 text-xs">JPG, PNG, WEBP — the patient will see this face</p>
+                </div>
+              )}
+            </div>
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
+          </div>
+
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-base font-bold text-ink-700 mb-1.5">Name</label>
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Priya" className="w-full rounded-xl border-2 border-cream-300 bg-white px-4 py-3 text-base focus:border-honey-400 focus:outline-none" />
+              <label className="block text-base font-bold text-ink-700 mb-1.5">Full Name *</label>
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Priya Sharma" className="w-full rounded-xl border-2 border-cream-300 bg-white px-4 py-3 text-base focus:border-honey-400 focus:outline-none" />
             </div>
             <div>
               <label className="block text-base font-bold text-ink-700 mb-1.5">Relationship</label>
@@ -456,30 +591,41 @@ function PeopleTab({
             </div>
           </div>
           <div>
-            <label className="block text-base font-bold text-ink-700 mb-1.5">Info (shown to patient)</label>
-            <textarea value={info} onChange={(e) => setInfo(e.target.value)} placeholder="Simple information about this person" rows={3} className="w-full rounded-xl border-2 border-cream-300 bg-white px-4 py-3 text-base focus:border-honey-400 focus:outline-none resize-none" />
+            <label className="block text-base font-bold text-ink-700 mb-1.5">About Them (shown to patient)</label>
+            <textarea value={info} onChange={(e) => setInfo(e.target.value)} placeholder="Write a warm, simple description to help the patient remember this person…" rows={3} className="w-full rounded-xl border-2 border-cream-300 bg-white px-4 py-3 text-base focus:border-honey-400 focus:outline-none resize-none" />
           </div>
           <div>
             <label className="block text-base font-bold text-ink-700 mb-1.5">Phone Number</label>
-            <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g. +91 98XXX XXX21" className="w-full rounded-xl border-2 border-cream-300 bg-white px-4 py-3 text-base focus:border-honey-400 focus:outline-none" />
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g. +91 98765 43210" className="w-full rounded-xl border-2 border-cream-300 bg-white px-4 py-3 text-base focus:border-honey-400 focus:outline-none" />
           </div>
-          <button type="submit" className="btn-success text-base px-6 py-3"><Check className="w-5 h-5" /> Save Person</button>
+          <div className="flex gap-3">
+            <button type="submit" disabled={saving} className="btn-success text-base px-6 py-3 flex-1">
+              <Check className="w-5 h-5" /> {saving ? 'Saving…' : 'Save Person'}
+            </button>
+            <button type="button" onClick={() => setShowForm(false)} className="btn-secondary text-base px-5 py-3">
+              Cancel
+            </button>
+          </div>
         </form>
       )}
 
       {loading && <LoadingState message="Loading people..." />}
       {error && <ErrorState message={error} onRetry={refresh} />}
       {!loading && !error && people.length === 0 && (
-        <EmptyState icon={<Users className="w-10 h-10" />} title="No people added yet" message="Add an important person to help your loved one recognize family and friends." />
+        <EmptyState icon={<Users className="w-10 h-10" />} title="No people added yet" message="Add a person with their real photo to help your loved one recognize family and friends." />
       )}
 
       {!loading && !error && people.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {people.map((p) => (
             <div key={p.id} className="card-base overflow-hidden">
-              <div className="w-full aspect-square bg-gradient-to-br from-sage-200 to-cream-200 flex items-center justify-center">
-                <Users className="w-12 h-12 text-sage-600" />
-              </div>
+              {p.image && p.image.startsWith('data:') ? (
+                <img src={p.image} alt={p.name} className="w-full aspect-square object-cover object-top" />
+              ) : (
+                <div className="w-full aspect-square bg-gradient-to-br from-sage-200 to-cream-200 flex items-center justify-center">
+                  <Users className="w-12 h-12 text-sage-600" />
+                </div>
+              )}
               <div className="p-4">
                 <p className="font-bold text-ink-800 text-lg leading-tight">{p.name}</p>
                 <p className="text-honey-600 text-sm font-bold">{p.relationship}</p>

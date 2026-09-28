@@ -1,6 +1,6 @@
 import { useApp } from '@/context/AppContext';
 import { useState } from 'react';
-import { LogIn, Eye, EyeOff, Sun } from 'lucide-react';
+import { LogIn, Eye, EyeOff, Sun, Sparkles } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
 export function LoginPage() {
@@ -41,6 +41,8 @@ export function LoginPage() {
   return (
     <div className="min-h-screen bg-cream-100 flex items-center justify-center p-4">
       <div className="card-base p-8 max-w-md w-full animate-scaleIn">
+
+        {/* Header */}
         <div className="text-center mb-6">
           <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-honey-400 to-honey-600 flex items-center justify-center shadow-warm">
             <Sun className="w-9 h-9 text-white" />
@@ -107,6 +109,33 @@ export function LoginPage() {
           >
             Forgot password?
           </button>
+        </div>
+
+        {/* Divider */}
+        <div className="relative my-6 text-center">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-cream-300" />
+          </div>
+          <span className="relative bg-white px-3 text-sm text-ink-400 font-semibold">or explore first</span>
+        </div>
+
+        {/* Interactive Tour — does NOT grant platform access */}
+        <button
+          type="button"
+          onClick={() => navigate('demo')}
+          className="w-full bg-gradient-to-r from-honey-50 to-amber-50 hover:from-honey-100 hover:to-amber-100 border-2 border-honey-300 text-honey-800 font-bold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 text-base transition active:scale-95 shadow-sm"
+        >
+          <Sparkles className="w-5 h-5 text-honey-600" />
+          Take the Interactive Feature Tour
+        </button>
+
+        <p className="text-center text-xs text-ink-400 mt-3">
+          The tour is a read-only preview — you'll need an account to use the platform.
+        </p>
+
+        <div className="mt-4 text-center flex items-center justify-center gap-2 text-xs text-ink-400">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>Supabase Cloud Connected</span>
         </div>
       </div>
     </div>

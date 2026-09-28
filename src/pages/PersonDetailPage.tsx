@@ -35,7 +35,11 @@ export function PersonDetailPage() {
       <PageHeader title={person.name} subtitle={person.relationship} />
 
       <div className="card-base overflow-hidden animate-scaleIn">
-        <Illustration id={person.image} label={person.name} className="w-full aspect-square sm:aspect-[4/3]" rounded="rounded-none" />
+        {person.image && person.image.startsWith('data:') ? (
+          <img src={person.image} alt={person.name} className="w-full aspect-square sm:aspect-[4/3] object-cover object-top" />
+        ) : (
+          <Illustration id={person.image} label={person.name} className="w-full aspect-square sm:aspect-[4/3]" rounded="rounded-none" />
+        )}
 
         <div className="p-6 sm:p-8">
           <p className="text-2xl font-display font-extrabold text-ink-800 mb-2">{person.name}</p>

@@ -35,7 +35,11 @@ export function MemoryDetailPage() {
       <PageHeader title={memory.title} subtitle={memory.year} />
 
       <div className="card-base overflow-hidden animate-scaleIn">
-        <Illustration id={memory.image} label={memory.title} className="w-full aspect-[4/3]" rounded="rounded-none" />
+        {memory.image && memory.image.startsWith('data:') ? (
+          <img src={memory.image} alt={memory.title} className="w-full aspect-[4/3] object-cover" />
+        ) : (
+          <Illustration id={memory.image} label={memory.title} className="w-full aspect-[4/3]" rounded="rounded-none" />
+        )}
 
         <div className="p-6 sm:p-8">
           <p className="text-2xl font-display font-extrabold text-ink-800 mb-3">{memory.caption}</p>

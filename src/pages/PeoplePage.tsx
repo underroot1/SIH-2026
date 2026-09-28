@@ -22,14 +22,13 @@ export function PeoplePage() {
       />
 
       {loading && <LoadingState message="Loading your people..." />}
-
       {error && <ErrorState message={error} onRetry={refresh} />}
 
       {!loading && !error && people.length === 0 && (
         <EmptyState
           icon={<Users className="w-10 h-10" />}
           title="No people added yet"
-          message="Your caregiver can add important people for you."
+          message="Your family helper will add important people here for you."
         />
       )}
 
@@ -42,7 +41,11 @@ export function PeoplePage() {
               style={{ animationDelay: `${idx * 100}ms` }}
               onClick={() => navigate('person-detail', { personId: person.id })}
             >
-              <Illustration id={person.image} label={person.name} className="w-full aspect-square" rounded="rounded-none" />
+              {person.image && person.image.startsWith('data:') ? (
+                <img src={person.image} alt={person.name} className="w-full aspect-square object-cover object-top" />
+              ) : (
+                <Illustration id={person.image} label={person.name} className="w-full aspect-square" rounded="rounded-none" />
+              )}
               <div className="p-5 text-center">
                 <p className="font-display font-extrabold text-ink-800 text-3xl mb-1">{person.name}</p>
                 <p className="text-honey-600 font-bold text-lg mb-4">{person.relationship}</p>

@@ -12,6 +12,8 @@ import { SignUpPage } from '@/pages/SignUpPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { OnboardingPage } from '@/pages/OnboardingPage';
 import { CaregiverDashboardPage } from '@/pages/CaregiverDashboardPage';
+import { DemoPage } from '@/pages/DemoPage';
+import { AuthGateModal } from '@/components/AuthGateModal';
 
 function AppRouter() {
   const { route, authLoading } = useApp();
@@ -24,28 +26,39 @@ function AppRouter() {
     );
   }
 
-  if (route === 'signup') return <SignUpPage />;
-  if (route === 'login') return <LoginPage />;
-  if (route === 'onboarding') return <OnboardingPage />;
+  const renderPage = () => {
+    if (route === 'demo') return <DemoPage />;
+    if (route === 'signup') return <SignUpPage />;
+    if (route === 'login') return <LoginPage />;
+    if (route === 'onboarding') return <OnboardingPage />;
 
-  if (route === 'caregiver-dashboard') {
+    if (route === 'caregiver-dashboard') {
+      return (
+        <CaregiverLayout>
+          <CaregiverDashboardPage />
+        </CaregiverLayout>
+      );
+    }
+
     return (
-      <CaregiverLayout>
-        <CaregiverDashboardPage />
-      </CaregiverLayout>
+      <PatientLayout>
+        {route === 'my-day' && <MyDayPage />}
+        {route === 'play' && <PlayPage />}
+        {route === 'memories' && <MemoriesPage />}
+        {route === 'memory-detail' && <MemoryDetailPage />}
+        {route === 'people' && <PeoplePage />}
+        {route === 'person-detail' && <PersonDetailPage />}
+        {route === 'help' && <HelpPage />}
+      </PatientLayout>
     );
-  }
+  };
 
   return (
-    <PatientLayout>
-      {route === 'my-day' && <MyDayPage />}
-      {route === 'play' && <PlayPage />}
-      {route === 'memories' && <MemoriesPage />}
-      {route === 'memory-detail' && <MemoryDetailPage />}
-      {route === 'people' && <PeoplePage />}
-      {route === 'person-detail' && <PersonDetailPage />}
-      {route === 'help' && <HelpPage />}
-    </PatientLayout>
+    <>
+      {renderPage()}
+      {/* Auth gate modal renders globally above all pages */}
+      <AuthGateModal />
+    </>
   );
 }
 

@@ -22,14 +22,13 @@ export function MemoriesPage() {
       />
 
       {loading && <LoadingState message="Loading your memories..." />}
-
       {error && <ErrorState message={error} onRetry={refresh} />}
 
       {!loading && !error && memories.length === 0 && (
         <EmptyState
           icon={<Images className="w-10 h-10" />}
           title="No memories yet"
-          message="Your caregiver can add memories for you to enjoy."
+          message="Your family helper will add your special memories here."
         />
       )}
 
@@ -42,7 +41,11 @@ export function MemoriesPage() {
               style={{ animationDelay: `${idx * 100}ms` }}
               onClick={() => navigate('memory-detail', { memoryId: memory.id })}
             >
-              <Illustration id={memory.image} className="w-full aspect-[4/3]" rounded="rounded-none" />
+              {memory.image && memory.image.startsWith('data:') ? (
+                <img src={memory.image} alt={memory.title} className="w-full aspect-[4/3] object-cover" />
+              ) : (
+                <Illustration id={memory.image} className="w-full aspect-[4/3]" rounded="rounded-none" />
+              )}
               <div className="p-5">
                 <p className="font-display font-extrabold text-ink-800 text-2xl mb-1">{memory.title}</p>
                 <p className="text-ink-500 text-lg mb-1">{memory.description}</p>

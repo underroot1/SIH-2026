@@ -1,4 +1,13 @@
-import type { Reminder, Memory, Person, Game } from '@/data/mockData';
+import {
+  type Reminder,
+  type Memory,
+  type Person,
+  type Game,
+  mockReminders,
+  mockMemories,
+  mockPeople,
+  mockGames,
+} from '@/data/mockData';
 import { supabase } from '@/lib/supabaseClient';
 
 /**
@@ -14,9 +23,18 @@ function fail<T>(fallback: T, message: string): ApiResponse<T> {
 }
 
 async function currentUserId(): Promise<string | null> {
-  const { data } = await supabase.auth.getUser();
-  return data.user?.id ?? null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    return data.user?.id ?? null;
+  } catch {
+    return null;
+  }
 }
+
+// In-memory demo state for when browsing in Guest / Demo mode
+let demoReminders: Reminder[] = [...mockReminders];
+let demoMemories: Memory[] = [...mockMemories];
+let demoPeople: Person[] = [...mockPeople];
 
 /**
  * ─── REMINDER SERVICE ───────────────────────────────────────────────
@@ -25,7 +43,10 @@ async function currentUserId(): Promise<string | null> {
 export const reminderService = {
   async getAll(): Promise<ApiResponse<Reminder[]>> {
     const userId = await currentUserId();
-    if (!userId) return fail([], 'Please log in to see your reminders.');
+    if (!userId) {
+      // In demo/guest mode, return mock reminders
+      return { data: [...demoReminders], error: null };
+    }
 
     const { data, error } = await supabase
       .from('reminders')
@@ -38,6 +59,12 @@ export const reminderService = {
   },
 
   async complete(id: string): Promise<ApiResponse<{ id: string; done: boolean }>> {
+    const userId = await currentUserId();
+    if (!userId) {
+      demoReminders = demoReminders.map((r) => (r.id === id ? { ...r, done: true } : r));
+      return { data: { id, done: true }, error: null };
+    }
+
     const { error } = await supabase.from('reminders').update({ done: true }).eq('id', id);
     if (error) return fail({ id, done: false }, error.message);
     return { data: { id, done: true }, error: null };
@@ -45,8 +72,13 @@ export const reminderService = {
 
   async create(reminder: Omit<Reminder, 'id' | 'done'>): Promise<ApiResponse<Reminder>> {
     const userId = await currentUserId();
-    const placeholder: Reminder = { ...reminder, id: '', done: false };
-    if (!userId) return fail(placeholder, 'Please log in to add a reminder.');
+    const newId = 'rem_' + Math.random().toString(36).slice(2, 9);
+    const newReminder: Reminder = { ...reminder, id: newId, done: false };
+
+    if (!userId) {
+      demoReminders = [...demoReminders, newReminder];
+      return { data: newReminder, error: null };
+    }
 
     const { data, error } = await supabase
       .from('reminders')
@@ -54,7 +86,7 @@ export const reminderService = {
       .select('id, type, title, time, description, done, icon')
       .single();
 
-    if (error || !data) return fail(placeholder, error?.message ?? 'Could not create reminder.');
+    if (error || !data) return fail(newReminder, error?.message ?? 'Could not create reminder.');
     return { data: data as Reminder, error: null };
   },
 };
@@ -66,7 +98,9 @@ export const reminderService = {
 export const memoryService = {
   async getAll(): Promise<ApiResponse<Memory[]>> {
     const userId = await currentUserId();
-    if (!userId) return fail([], 'Please log in to see your memories.');
+    if (!userId) {
+      return { data: [...demoMemories], error: null };
+    }
 
     const { data, error } = await supabase
       .from('memories')
@@ -80,8 +114,13 @@ export const memoryService = {
 
   async create(memory: Omit<Memory, 'id'>): Promise<ApiResponse<Memory>> {
     const userId = await currentUserId();
-    const placeholder: Memory = { ...memory, id: '' };
-    if (!userId) return fail(placeholder, 'Please log in to add a memory.');
+    const newId = 'mem_' + Math.random().toString(36).slice(2, 9);
+    const newMemory: Memory = { ...memory, id: newId };
+
+    if (!userId) {
+      demoMemories = [...demoMemories, newMemory];
+      return { data: newMemory, error: null };
+    }
 
     const { data, error } = await supabase
       .from('memories')
@@ -89,7 +128,7 @@ export const memoryService = {
       .select('id, title, description, year, image, caption, detail')
       .single();
 
-    if (error || !data) return fail(placeholder, error?.message ?? 'Could not save memory.');
+    if (error || !data) return fail(newMemory, error?.message ?? 'Could not save memory.');
     return { data: data as Memory, error: null };
   },
 };
@@ -101,7 +140,9 @@ export const memoryService = {
 export const peopleService = {
   async getAll(): Promise<ApiResponse<Person[]>> {
     const userId = await currentUserId();
-    if (!userId) return fail([], 'Please log in to see your people.');
+    if (!userId) {
+      return { data: [...demoPeople], error: null };
+    }
 
     const { data, error } = await supabase
       .from('people')
@@ -115,8 +156,13 @@ export const peopleService = {
 
   async create(person: Omit<Person, 'id'>): Promise<ApiResponse<Person>> {
     const userId = await currentUserId();
-    const placeholder: Person = { ...person, id: '' };
-    if (!userId) return fail(placeholder, 'Please log in to add a person.');
+    const newId = 'per_' + Math.random().toString(36).slice(2, 9);
+    const newPerson: Person = { ...person, id: newId };
+
+    if (!userId) {
+      demoPeople = [...demoPeople, newPerson];
+      return { data: newPerson, error: null };
+    }
 
     const { data, error } = await supabase
       .from('people')
@@ -124,24 +170,31 @@ export const peopleService = {
       .select('id, name, relationship, image, info, phone')
       .single();
 
-    if (error || !data) return fail(placeholder, error?.message ?? 'Could not save person.');
+    if (error || !data) return fail(newPerson, error?.message ?? 'Could not save person.');
     return { data: data as Person, error: null };
   },
 };
 
 /**
  * ─── GAME SERVICE ───────────────────────────────────────────────────
- * Shared app content — same rows for every signed-in user.
+ * Shared app content — readable by signed-in users or fallbacks to mockGames.
  */
 
 export const gameService = {
   async getAll(): Promise<ApiResponse<Game[]>> {
-    const { data, error } = await supabase
-      .from('games')
-      .select('id, title, description, icon, gradient')
-      .order('created_at', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from('games')
+        .select('id, title, description, icon, gradient')
+        .order('created_at', { ascending: true });
 
-    if (error) return fail([], error.message);
-    return { data: (data ?? []) as Game[], error: null };
+      if (error || !data || data.length === 0) {
+        return { data: mockGames, error: null };
+      }
+      return { data: data as Game[], error: null };
+    } catch {
+      return { data: mockGames, error: null };
+    }
   },
 };
+

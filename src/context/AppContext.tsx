@@ -22,7 +22,8 @@ export type Route =
   | 'signup'
   | 'login'
   | 'onboarding'
-  | 'caregiver-dashboard';
+  | 'caregiver-dashboard'
+  | 'demo';
 
 export type AuthState = 'guest' | 'authenticated' | 'onboarding';
 
@@ -51,6 +52,11 @@ interface AppState {
   session: Session | null;
   authLoading: boolean;
   signOut: () => Promise<void>;
+  // Auth gate modal (for demo mode feature lock)
+  authGateOpen: boolean;
+  authGateFeature: string;
+  openAuthGate: (feature?: string) => void;
+  closeAuthGate: () => void;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -68,6 +74,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isCaregiverMode, setIsCaregiverMode] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  // Auth gate
+  const [authGateOpen, setAuthGateOpen] = useState(false);
+  const [authGateFeature, setAuthGateFeature] = useState('');
 
   // Pull the display name from the profiles table (created automatically
   // on signup by a DB trigger — see supabase/schema.sql).
@@ -96,6 +105,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setRoute('my-day');
         loadProfile(initialSession.user.id, initialSession.user.user_metadata?.full_name);
       }
+      // No guest demo auto-restore — login is mandatory
       setAuthLoading(false);
     });
 
@@ -147,10 +157,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch {}
     setIsCaregiverMode(false);
     setHistory([]);
+    setAuthGateOpen(false);
     setRoute('login');
+  };
+
+  const openAuthGate = (feature = 'use this feature') => {
+    setAuthGateFeature(feature);
+    setAuthGateOpen(true);
+  };
+
+  const closeAuthGate = () => {
+    setAuthGateOpen(false);
+    setAuthGateFeature('');
   };
 
   const value: AppState = {
@@ -176,6 +199,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     session,
     authLoading,
     signOut,
+    authGateOpen,
+    authGateFeature,
+    openAuthGate,
+    closeAuthGate,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

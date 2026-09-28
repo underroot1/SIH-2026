@@ -1,10 +1,10 @@
 import { useApp } from '@/context/AppContext';
 import { LANGUAGES, type Language } from '@/data/mockData';
-import { Globe, Type, ChevronDown, Check } from 'lucide-react';
+import { Globe, Type, ChevronDown, Check, Sparkles } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 export function TopBar() {
-  const { language, setLanguage, textScale, setTextScale } = useApp();
+  const { language, setLanguage, textScale, setTextScale, navigate } = useApp();
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
 
@@ -36,6 +36,16 @@ export function TopBar() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Feature Tour Button */}
+          <button
+            onClick={() => navigate('demo')}
+            className="flex items-center gap-1.5 bg-honey-100 hover:bg-honey-200 border border-honey-300 text-honey-800 rounded-2xl px-3 py-2 transition font-bold text-sm"
+            title="Explore Interactive Product Tour"
+          >
+            <Sparkles className="w-4 h-4 text-honey-600" />
+            <span className="hidden md:inline">Tour</span>
+          </button>
+
           {/* Text size control */}
           <div className="flex items-center gap-1 bg-cream-100 rounded-2xl p-1.5 border border-cream-300">
             <Type className="w-5 h-5 text-ink-400 ml-1.5" />
