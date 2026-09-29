@@ -14,10 +14,11 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { SuccessToast, LoadingState, ErrorState } from '@/components/UI';
+import { ConditionCareModule } from '@/components/ConditionCareModule';
 
 export function MyDayPage() {
   const { t, i18n } = useTranslation();
-  const { patientName, navigate } = useApp();
+  const { patientName, navigate, careCondition } = useApp();
   const { reminders, loading, error, completeReminder, refresh } = useReminders();
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -29,6 +30,28 @@ export function MyDayPage() {
 
   const nextReminder = reminders.find((r) => !r.done);
   const upcoming = reminders.filter((r) => !r.done && r.id !== nextReminder?.id).slice(0, 2);
+
+  const reminderLabel =
+    careCondition === 'parkinsons'
+      ? 'Parkinson’s Medication Window'
+      : careCondition === 'stroke'
+      ? 'Speech & Physical Therapy Task'
+      : careCondition === 'mci'
+      ? 'Cognitive Independence Task'
+      : careCondition === 'healthy_aging'
+      ? 'Daily Wellness & Nutrition'
+      : t('medicineTimeLabel');
+
+  const completeButtonLabel =
+    careCondition === 'parkinsons'
+      ? 'I Took My Scheduled Medicine'
+      : careCondition === 'stroke'
+      ? 'Completed My Daily Exercise'
+      : careCondition === 'mci'
+      ? 'Task Completed'
+      : careCondition === 'healthy_aging'
+      ? 'Completed for Today'
+      : t('tookMedicine');
 
   const handleComplete = () => {
     if (nextReminder) {
@@ -48,17 +71,20 @@ export function MyDayPage() {
   return (
     <div className="max-w-4xl mx-auto">
       {/* Greeting */}
-      <div className="text-center mb-8 animate-slideUp">
+      <div className="text-center mb-6 animate-slideUp">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-honey-100 mb-3">
           <Sun className="w-8 h-8 text-honey-600" />
         </div>
         <h1 className="section-title text-3xl sm:text-4xl mb-1">
-          {greeting}, {patientName} ❤️
+          {greeting}, {patientName || 'Elena'} ❤️
         </h1>
         <p className="text-xl text-ink-500 font-semibold">
           {t('todayIs')} {todayName}, {dateStr}
         </p>
       </div>
+
+      {/* Disease-Specific Adaptive Care Hub */}
+      <ConditionCareModule />
 
       {loading && <LoadingState message={t('loadingDay')} />}
 
@@ -74,7 +100,7 @@ export function MyDayPage() {
                   <Pill className="w-8 h-8 text-honey-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-honey-600 uppercase tracking-wide">{t('medicineTimeLabel')}</p>
+                  <p className="text-sm font-bold text-honey-600 uppercase tracking-wide">{reminderLabel}</p>
                   <p className="text-3xl font-display font-extrabold text-ink-800">{nextReminder.time}</p>
                 </div>
               </div>
@@ -82,7 +108,7 @@ export function MyDayPage() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <button onClick={handleComplete} className="btn-success flex-1 text-xl">
                   <Check className="w-7 h-7" />
-                  {t('tookMedicine')}
+                  {completeButtonLabel}
                 </button>
                 <button className="btn-secondary flex-1">
                   <Clock className="w-6 h-6" />
