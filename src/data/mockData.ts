@@ -1,10 +1,13 @@
-export type Language = 'en' | 'hi' | 'as' | 'bn';
+export type Language = 'en' | 'zh' | 'fr' | 'es' | 'hi' | 'bn' | 'as';
 
 export const LANGUAGES: { code: Language; label: string; nativeLabel: string }[] = [
   { code: 'en', label: 'English', nativeLabel: 'English' },
+  { code: 'zh', label: 'Chinese (Singapore)', nativeLabel: '简体中文' },
+  { code: 'fr', label: 'French', nativeLabel: 'Français' },
+  { code: 'es', label: 'Spanish', nativeLabel: 'Español' },
   { code: 'hi', label: 'Hindi', nativeLabel: 'हिन्दी' },
-  { code: 'as', label: 'Assamese', nativeLabel: 'অসমীয়া' },
   { code: 'bn', label: 'Bengali', nativeLabel: 'বাংলা' },
+  { code: 'as', label: 'Assamese', nativeLabel: 'অসমীয়া' },
 ];
 
 export type TextScale = 1 | 2 | 3 | 4;

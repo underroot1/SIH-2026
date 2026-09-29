@@ -52,6 +52,7 @@ interface AppState {
   session: Session | null;
   authLoading: boolean;
   signOut: () => Promise<void>;
+  loginWithDemo: (usernameOrEmail?: string) => void;
   // Auth gate modal (for demo mode feature lock)
   authGateOpen: boolean;
   authGateFeature: string;
@@ -93,21 +94,48 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Check for an existing session on load, then keep it in sync.
+  // Check for existing demo user or Supabase session on load
   useEffect(() => {
     let active = true;
 
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      if (!active) return;
-      setSession(initialSession);
-      if (initialSession) {
-        setAuthState('authenticated');
-        setRoute('my-day');
-        loadProfile(initialSession.user.id, initialSession.user.user_metadata?.full_name);
-      }
-      // No guest demo auto-restore — login is mandatory
-      setAuthLoading(false);
-    });
+    // First check local demo user storage
+    const savedDemo = localStorage.getItem('haven_demo_user');
+    if (savedDemo) {
+      try {
+        const parsed = JSON.parse(savedDemo);
+        if (parsed?.name) {
+          setPatientName(parsed.name);
+          setAuthState('authenticated');
+          setRoute('my-day');
+          setSession({
+            access_token: 'demo-token',
+            user: {
+              id: 'demo-user',
+              email: parsed.email || 'demo@haven.app',
+              user_metadata: { full_name: parsed.name },
+            },
+          } as any);
+          setAuthLoading(false);
+          return;
+        }
+      } catch {}
+    }
+
+    supabase.auth
+      .getSession()
+      .then(({ data: { session: initialSession } }) => {
+        if (!active) return;
+        setSession(initialSession);
+        if (initialSession) {
+          setAuthState('authenticated');
+          setRoute('my-day');
+          loadProfile(initialSession.user.id, initialSession.user.user_metadata?.full_name);
+        }
+        setAuthLoading(false);
+      })
+      .catch(() => {
+        if (active) setAuthLoading(false);
+      });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
@@ -115,14 +143,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setAuthState((prev) => (prev === 'onboarding' ? prev : 'authenticated'));
         loadProfile(newSession.user.id, newSession.user.user_metadata?.full_name);
       } else {
-        setAuthState('guest');
-        setPatientName('');
+        const hasDemo = localStorage.getItem('haven_demo_user');
+        if (!hasDemo) {
+          setAuthState('guest');
+          setPatientName('');
+        }
       }
     });
 
     return () => {
       active = false;
-      listener.subscription.unsubscribe();
+      listener?.subscription?.unsubscribe();
     };
   }, []);
 
@@ -156,10 +187,50 @@ export function AppProvider({ children }: { children: ReactNode }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const loginWithDemo = (usernameOrEmail?: string) => {
+    let cleanName = (usernameOrEmail || 'Elena Vance').trim();
+    if (cleanName.includes('@')) {
+      cleanName = cleanName.split('@')[0];
+    }
+    const formattedName =
+      cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+
+    const email = usernameOrEmail?.includes('@')
+      ? usernameOrEmail
+      : `${cleanName.toLowerCase().replace(/[^a-z0-9]/g, '') || 'user'}@haven.app`;
+
+    const demoUser = {
+      id: 'demo-user-123',
+      email,
+      user_metadata: { full_name: formattedName },
+    };
+
+    const demoSession = {
+      access_token: 'haven-demo-session-token',
+      user: demoUser,
+    } as unknown as Session;
+
+    localStorage.setItem(
+      'haven_demo_user',
+      JSON.stringify({ name: formattedName, email })
+    );
+
+    setSession(demoSession);
+    setPatientName(formattedName);
+    setAuthState('authenticated');
+    setIsCaregiverMode(false);
+    setRoute('my-day');
+  };
+
   const signOut = async () => {
+    localStorage.removeItem('haven_demo_user');
+    localStorage.removeItem('haven_mock_session');
     try {
       await supabase.auth.signOut();
     } catch {}
+    setSession(null);
+    setPatientName('');
+    setAuthState('guest');
     setIsCaregiverMode(false);
     setHistory([]);
     setAuthGateOpen(false);
@@ -199,6 +270,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     session,
     authLoading,
     signOut,
+    loginWithDemo,
     authGateOpen,
     authGateFeature,
     openAuthGate,

@@ -22,5 +22,18 @@
   "actionPeopleDesc": "See important people in my life.",
   "actionHelpLabel": "I Need Help",
   "actionHelpDesc": "Get help quickly.",
-  "taskCompletedToast": "You completed this task ⭐"
+  "taskCompletedToast": "You completed this task ⭐",
+  "welcomeBack": "Welcome back",
+  "happyToSeeYou": "We're happy to see you again.",
+  "emailOrUsername": "Email or Username",
+  "password": "Password",
+  "logIn": "Log In",
+  "quickDemoLogin": "⚡ Quick Demo Login (1-Click)",
+  "createAccount": "Create an account",
+  "forgotPassword": "Forgot password?",
+  "tour": "Tour",
+  "tourPrompt": "Take the Interactive Feature Tour",
+  "textSize": "Text Size",
+  "youAreSafe": "You are safe. 🌿",
+  "safeSub": "Your family and caregivers are here to help."
 }

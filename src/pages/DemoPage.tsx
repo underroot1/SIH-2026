@@ -40,17 +40,17 @@ const TOUR_STEPS: TourStep[] = [
   {
     id: 'intro',
     badge: 'Introduction',
-    title: 'Welcome to Sahyog (सहयोग)',
+    title: 'Welcome to Haven',
     tagline: 'A gentle, dignified companion designed for memory support.',
     description:
-      'Sahyog is crafted specifically for elderly individuals, those living with mild cognitive impairment or dementia, and their dedicated family caregivers. It replaces stress and confusion with warmth, clarity, and daily rhythm.',
+      'Haven is crafted specifically for elderly individuals, those living with mild cognitive impairment or dementia, and their dedicated family caregivers. It replaces stress and confusion with warmth, clarity, and daily rhythm.',
     icon: Sun,
     gradient: 'from-honey-400 to-honey-600',
     accentColor: 'text-honey-600',
     points: [
       'Calm, soothing color palette — zero sensory overwhelm',
       'Tactile, large buttons with crystal-clear icons',
-      'Multilingual Indian language support with instant text resizing',
+      'Global multilingual support (Chinese, French, Spanish, English, etc.) with instant text resizing',
       'Bridges the care gap between patients and their families',
     ],
   },
@@ -132,32 +132,32 @@ const TOUR_STEPS: TourStep[] = [
     title: 'Caregiver Portal & Accessibility',
     tagline: 'Peace of mind for families, complete accessibility for patients.',
     description:
-      'Family members can remotely add reminders, upload new photos, and monitor whether medicines were taken. The app also features instantaneous 4-level text resizing and 4 Indian languages.',
+      'Family members can remotely add reminders, upload new photos, and monitor whether medicines were taken. The app also features instantaneous 4-level text resizing and 7 global & regional languages.',
     icon: Shield,
     gradient: 'from-teal-400 to-teal-600',
     accentColor: 'text-teal-600',
     points: [
       'Secure Caregiver Dashboard with emergency contact controls',
       'Top-bar A- / A+ text enlargement for effortless reading',
-      'Native translations in English, Hindi (हिन्दी), Bengali (বাংলা), and Assamese (অসমীয়া)',
-      'Powered by real-time cloud sync with Supabase',
+      'Native translations in English, Chinese (新加坡中文), French (Français), Spanish (Español), Hindi, Bengali, and Assamese',
+      'Powered by resilient cloud sync and instant offline demo fallback',
     ],
     interactiveDemo: { type: 'accessibility' },
   },
   {
     id: 'get-started',
     badge: 'Ready to Use',
-    title: 'Your Cloud Database is Connected!',
-    tagline: 'Log in, create an account, or test immediately with live demo.',
+    title: 'Universal Access & Demo Ready!',
+    tagline: 'Log in, create an account, or test immediately with 1-click quick demo.',
     description:
-      'Sahyog is now linked with your live Supabase cloud database. All your reminders, memories, and profile updates will be safely preserved in the cloud.',
+      'Haven works seamlessly with Supabase cloud database, and features instant zero-config login for immediate hackathon and judge evaluations.',
     icon: Sparkles,
     gradient: 'from-honey-500 to-coral-500',
     accentColor: 'text-honey-600',
     points: [
-      'Cloud Database: Live & connected securely',
-      'Database Schema: Profiles, Reminders, Memories, People & Games active',
-      'Sign up free in seconds — no credit card needed',
+      'Zero-Config Hackathon Review: 1-click quick demo login',
+      'Cloud Database Support: Profiles, Reminders, Memories, People & Games',
+      'Instant accessibility: Font scaling & international languages from any screen',
       'Full Security: Row-level security protects your family data',
     ],
   },
@@ -198,7 +198,7 @@ export function DemoPage() {
             <h1 className="font-display font-extrabold text-ink-800 text-xl leading-tight">
               Interactive Product Tour
             </h1>
-            <p className="text-ink-400 text-xs sm:text-sm">Explore all features of Sahyog</p>
+            <p className="text-ink-400 text-xs sm:text-sm">Explore all features of Haven</p>
           </div>
         </div>
 
@@ -371,7 +371,7 @@ export function DemoPage() {
                   </div>
                   <div className="flex items-center gap-2 text-ink-700 font-semibold text-sm">
                     <Globe className="w-4 h-4 text-honey-600" />
-                    <span>4 Indian Languages</span>
+                    <span>7 Global & Regional Languages</span>
                   </div>
                 </div>
               )}
@@ -408,7 +408,7 @@ export function DemoPage() {
               ) : (
                 <>
                   <h3 className="text-xl font-bold text-ink-800">Ready to Get Started?</h3>
-                  <p className="text-ink-500 text-sm">Create a free account to access all features of Sahyog.</p>
+                  <p className="text-ink-500 text-sm">Create a free account or test immediately with 1-click Demo.</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <button
                       onClick={() => navigate('signup')}
@@ -422,13 +422,13 @@ export function DemoPage() {
                       className="btn-secondary flex items-center justify-center gap-2 py-3 text-lg border-2 border-honey-400 text-honey-700 hover:bg-honey-100"
                     >
                       <LogIn className="w-5 h-5" />
-                      Log In
+                      Log In / Quick Demo
                     </button>
                   </div>
                 </>
               )}
               <p className="text-xs text-ink-400">
-                Secure Cloud Database Connected • No credit card required
+                Universal Demo & Cloud Database Ready • Instant Access
               </p>
             </div>
           ) : (
@@ -469,7 +469,7 @@ export function DemoPage() {
 
       {/* Footer */}
       <footer className="max-w-4xl w-full mx-auto text-center text-xs text-ink-400 pt-2">
-        Sahyog Assistive Health Companion • Smart India Hackathon 2026
+        Haven Assistive Health & Memory Companion • RevenueCat Ship-a-ton 2026
       </footer>
     </div>
   );

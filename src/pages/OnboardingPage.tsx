@@ -265,7 +265,7 @@ function StepFeatures({ onNext, onPrev }: { onNext: () => void; onPrev: () => vo
 
 function StepFinish({ patientName, onFinish, onPrev }: { patientName: string; onFinish: () => void; onPrev: () => void }) {
   return (
-    <StepWrapper onNext={onFinish} onPrev={onPrev} nextLabel="Start Using Sahyog">
+    <StepWrapper onNext={onFinish} onPrev={onPrev} nextLabel="Start Using Haven">
       <div className="text-center">
         <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-sage-100 flex items-center justify-center">
           <Check className="w-10 h-10 text-sage-600" />

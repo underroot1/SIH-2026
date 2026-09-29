@@ -8,7 +8,7 @@ import {
   mockPeople,
   mockGames,
 } from '@/data/mockData';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase, isSupabaseConfigured } from '@/lib/supabaseClient';
 
 /**
  * Base API response type — every hook in src/hooks depends on this shape.
@@ -23,6 +23,9 @@ function fail<T>(fallback: T, message: string): ApiResponse<T> {
 }
 
 async function currentUserId(): Promise<string | null> {
+  if (!isSupabaseConfigured) return null;
+  const isDemo = localStorage.getItem('haven_demo_user');
+  if (isDemo) return null; // Use local in-memory interactive data for demo user
   try {
     const { data } = await supabase.auth.getUser();
     return data.user?.id ?? null;

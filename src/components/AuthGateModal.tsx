@@ -50,7 +50,7 @@ export function AuthGateModal() {
 
         {/* Explanation */}
         <p className="text-ink-600 text-base sm:text-lg mb-6 leading-relaxed">
-          You are currently previewing Sahyog. To{' '}
+          You are currently previewing Haven. To{' '}
           <strong className="text-ink-900 font-bold">
             {authGateFeature || 'use interactive features'}
           </strong>{' '}
