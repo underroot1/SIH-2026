@@ -2,11 +2,6 @@ import { useApp } from '@/context/AppContext';
 import { useReminders } from '@/hooks/useReminders';
 import { useTranslation } from 'react-i18next';
 import {
-  Calendar,
-  Brain,
-  Images,
-  Users,
-  LifeBuoy,
   Pill,
   Check,
   Clock,
@@ -18,7 +13,7 @@ import { ConditionCareModule } from '@/components/ConditionCareModule';
 
 export function MyDayPage() {
   const { t, i18n } = useTranslation();
-  const { patientName, navigate, careCondition } = useApp();
+  const { patientName, careCondition } = useApp();
   const { reminders, loading, error, completeReminder, refresh } = useReminders();
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -59,14 +54,6 @@ export function MyDayPage() {
       setShowSuccess(true);
     }
   };
-
-  const mainActions = [
-    { route: 'my-day' as const, label: t('actionMyDayLabel'), desc: t('actionMyDayDesc'), icon: Calendar, color: 'bg-honey-100 text-honey-700' },
-    { route: 'play' as const, label: t('actionPlayLabel'), desc: t('actionPlayDesc'), icon: Brain, color: 'bg-sage-100 text-sage-700' },
-    { route: 'memories' as const, label: t('actionMemoriesLabel'), desc: t('actionMemoriesDesc'), icon: Images, color: 'bg-coral-100 text-coral-700' },
-    { route: 'people' as const, label: t('actionPeopleLabel'), desc: t('actionPeopleDesc'), icon: Users, color: 'bg-cream-200 text-ink-700' },
-    { route: 'help' as const, label: t('actionHelpLabel'), desc: t('actionHelpDesc'), icon: LifeBuoy, color: 'bg-coral-100 text-coral-700' },
-  ];
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -148,27 +135,6 @@ export function MyDayPage() {
         </>
       )}
 
-      {/* Main action grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-        {mainActions.map((action) => {
-          const Icon = action.icon;
-          return (
-            <button
-              key={action.route}
-              onClick={() => navigate(action.route)}
-              className="card-base card-hover p-5 flex items-center gap-4 text-left group"
-            >
-              <div className={`w-16 h-16 rounded-2xl ${action.color} flex items-center justify-center shrink-0 group-hover:scale-110 transition`}>
-                <Icon className="w-9 h-9" strokeWidth={2.2} />
-              </div>
-              <div className="min-w-0">
-                <p className="font-display font-extrabold text-ink-800 text-xl leading-tight">{action.label}</p>
-                <p className="text-ink-500 text-base leading-tight mt-0.5">{action.desc}</p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
 
       {showSuccess && (
         <SuccessToast
