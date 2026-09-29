@@ -25,7 +25,7 @@ function fail<T>(fallback: T, message: string): ApiResponse<T> {
 async function currentUserId(): Promise<string | null> {
   if (!isSupabaseConfigured) return null;
   const isDemo = localStorage.getItem('haven_demo_user');
-  if (isDemo) return null; // Use local in-memory interactive data for demo user
+  if (isDemo) return null; // Use local in-memory/localStorage interactive data for demo user
   try {
     const { data } = await supabase.auth.getUser();
     return data.user?.id ?? null;
@@ -34,10 +34,25 @@ async function currentUserId(): Promise<string | null> {
   }
 }
 
-// In-memory demo state for when browsing in Guest / Demo mode
-let demoReminders: Reminder[] = [...mockReminders];
-let demoMemories: Memory[] = [...mockMemories];
-let demoPeople: Person[] = [...mockPeople];
+// Helpers for localStorage persistence so demo additions and deletions persist across reloads
+function getStored<T>(key: string, fallback: T): T {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function setStored<T>(key: string, data: T): void {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch {}
+}
+
+let demoReminders: Reminder[] = getStored('haven_reminders', [...mockReminders]);
+let demoMemories: Memory[] = getStored('haven_memories', [...mockMemories]);
+let demoPeople: Person[] = getStored('haven_people', [...mockPeople]);
 
 /**
  * ─── REMINDER SERVICE ───────────────────────────────────────────────
@@ -47,7 +62,6 @@ export const reminderService = {
   async getAll(): Promise<ApiResponse<Reminder[]>> {
     const userId = await currentUserId();
     if (!userId) {
-      // In demo/guest mode, return mock reminders
       return { data: [...demoReminders], error: null };
     }
 
@@ -65,6 +79,7 @@ export const reminderService = {
     const userId = await currentUserId();
     if (!userId) {
       demoReminders = demoReminders.map((r) => (r.id === id ? { ...r, done: true } : r));
+      setStored('haven_reminders', demoReminders);
       return { data: { id, done: true }, error: null };
     }
 
@@ -80,6 +95,7 @@ export const reminderService = {
 
     if (!userId) {
       demoReminders = [...demoReminders, newReminder];
+      setStored('haven_reminders', demoReminders);
       return { data: newReminder, error: null };
     }
 
@@ -91,6 +107,19 @@ export const reminderService = {
 
     if (error || !data) return fail(newReminder, error?.message ?? 'Could not create reminder.');
     return { data: data as Reminder, error: null };
+  },
+
+  async delete(id: string): Promise<ApiResponse<{ id: string }>> {
+    const userId = await currentUserId();
+    if (!userId) {
+      demoReminders = demoReminders.filter((r) => r.id !== id);
+      setStored('haven_reminders', demoReminders);
+      return { data: { id }, error: null };
+    }
+
+    const { error } = await supabase.from('reminders').delete().eq('id', id);
+    if (error) return fail({ id }, error.message);
+    return { data: { id }, error: null };
   },
 };
 
@@ -122,6 +151,7 @@ export const memoryService = {
 
     if (!userId) {
       demoMemories = [...demoMemories, newMemory];
+      setStored('haven_memories', demoMemories);
       return { data: newMemory, error: null };
     }
 
@@ -133,6 +163,31 @@ export const memoryService = {
 
     if (error || !data) return fail(newMemory, error?.message ?? 'Could not save memory.');
     return { data: data as Memory, error: null };
+  },
+
+  async delete(id: string): Promise<ApiResponse<{ id: string }>> {
+    const userId = await currentUserId();
+    if (!userId) {
+      demoMemories = demoMemories.filter((m) => m.id !== id);
+      setStored('haven_memories', demoMemories);
+      return { data: { id }, error: null };
+    }
+
+    const { error } = await supabase.from('memories').delete().eq('id', id);
+    if (error) return fail({ id }, error.message);
+    return { data: { id }, error: null };
+  },
+
+  async clearDemo(): Promise<ApiResponse<Memory[]>> {
+    demoMemories = [];
+    setStored('haven_memories', demoMemories);
+    return { data: [], error: null };
+  },
+
+  async restoreDefaults(): Promise<ApiResponse<Memory[]>> {
+    demoMemories = [...mockMemories];
+    setStored('haven_memories', demoMemories);
+    return { data: [...demoMemories], error: null };
   },
 };
 
@@ -164,6 +219,7 @@ export const peopleService = {
 
     if (!userId) {
       demoPeople = [...demoPeople, newPerson];
+      setStored('haven_people', demoPeople);
       return { data: newPerson, error: null };
     }
 
@@ -176,6 +232,31 @@ export const peopleService = {
     if (error || !data) return fail(newPerson, error?.message ?? 'Could not save person.');
     return { data: data as Person, error: null };
   },
+
+  async delete(id: string): Promise<ApiResponse<{ id: string }>> {
+    const userId = await currentUserId();
+    if (!userId) {
+      demoPeople = demoPeople.filter((p) => p.id !== id);
+      setStored('haven_people', demoPeople);
+      return { data: { id }, error: null };
+    }
+
+    const { error } = await supabase.from('people').delete().eq('id', id);
+    if (error) return fail({ id }, error.message);
+    return { data: { id }, error: null };
+  },
+
+  async clearDemo(): Promise<ApiResponse<Person[]>> {
+    demoPeople = [];
+    setStored('haven_people', demoPeople);
+    return { data: [], error: null };
+  },
+
+  async restoreDefaults(): Promise<ApiResponse<Person[]>> {
+    demoPeople = [...mockPeople];
+    setStored('haven_people', demoPeople);
+    return { data: [...demoPeople], error: null };
+  },
 };
 
 /**
@@ -186,6 +267,7 @@ export const peopleService = {
 export const gameService = {
   async getAll(): Promise<ApiResponse<Game[]>> {
     try {
+      if (!isSupabaseConfigured) return { data: mockGames, error: null };
       const { data, error } = await supabase
         .from('games')
         .select('id, title, description, icon, gradient')
@@ -200,4 +282,3 @@ export const gameService = {
     }
   },
 };
-

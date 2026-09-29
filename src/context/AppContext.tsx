@@ -5,7 +5,7 @@ import {
   useEffect,
   type ReactNode,
 } from 'react';
-import { type Language, type TextScale } from '@/data/mockData';
+import { type Language, type TextScale, type CareCondition } from '@/data/mockData';
 import i18n from '@/i18n';
 import { supabase } from '@/lib/supabaseClient';
 import type { Session } from '@supabase/supabase-js';
@@ -53,6 +53,8 @@ interface AppState {
   authLoading: boolean;
   signOut: () => Promise<void>;
   loginWithDemo: (usernameOrEmail?: string) => void;
+  careCondition: CareCondition;
+  setCareCondition: (c: CareCondition) => void;
   // Auth gate modal (for demo mode feature lock)
   authGateOpen: boolean;
   authGateFeature: string;
@@ -75,9 +77,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isCaregiverMode, setIsCaregiverMode] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  // Auth gate
   const [authGateOpen, setAuthGateOpen] = useState(false);
   const [authGateFeature, setAuthGateFeature] = useState('');
+  const [careCondition, setCareConditionState] = useState<CareCondition>(() => {
+    return (localStorage.getItem('haven_care_condition') as CareCondition) || 'dementia';
+  });
+
+  const setCareCondition = (c: CareCondition) => {
+    setCareConditionState(c);
+    localStorage.setItem('haven_care_condition', c);
+  };
 
   // Pull the display name from the profiles table (created automatically
   // on signup by a DB trigger — see supabase/schema.sql).
@@ -275,6 +284,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     authGateFeature,
     openAuthGate,
     closeAuthGate,
+    careCondition,
+    setCareCondition,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

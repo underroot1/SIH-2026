@@ -171,21 +171,6 @@ export function LoginPage() {
             <Sparkles className="w-4 h-4 text-honey-600" />
             {t('tourPrompt', 'Take the Interactive Feature Tour')}
           </button>
-
-          {/* Hackathon & Review Status Badge */}
-          <div className="mt-4 pt-3 border-t border-cream-200 flex items-center justify-center gap-2 text-xs text-ink-500">
-            {isSupabaseConfigured ? (
-              <>
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="font-medium">Supabase Cloud Active • Instant Demo Fallback</span>
-              </>
-            ) : (
-              <>
-                <ShieldCheck className="w-4 h-4 text-sage-600" />
-                <span className="font-medium">Hackathon Ready • Instant Zero-Config Login</span>
-              </>
-            )}
-          </div>
         </div>
       </div>
     </div>

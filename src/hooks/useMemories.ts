@@ -6,7 +6,10 @@ interface UseMemoriesResult {
   memories: Memory[];
   loading: boolean;
   error: string | null;
-  addMemory: (memory: Omit<Memory, 'id'>) => void;
+  addMemory: (memory: Omit<Memory, 'id'>) => Promise<void>;
+  deleteMemory: (id: string) => Promise<void>;
+  clearMemories: () => Promise<void>;
+  restoreMemories: () => Promise<void>;
   refresh: () => void;
 }
 
@@ -36,11 +39,34 @@ export function useMemories(): UseMemoriesResult {
     fetchMemories();
   }, [fetchMemories]);
 
-  const addMemory = useCallback((memory: Omit<Memory, 'id'>) => {
-    memoryService.create(memory).then((res) => {
-      if (res.data) setMemories((ms) => [...ms, res.data]);
-    });
+  const addMemory = useCallback(async (memory: Omit<Memory, 'id'>) => {
+    const res = await memoryService.create(memory);
+    if (res.data) setMemories((ms) => [...ms, res.data]);
   }, []);
 
-  return { memories, loading, error, addMemory, refresh: fetchMemories };
+  const deleteMemory = useCallback(async (id: string) => {
+    await memoryService.delete(id);
+    setMemories((ms) => ms.filter((m) => m.id !== id));
+  }, []);
+
+  const clearMemories = useCallback(async () => {
+    const res = await memoryService.clearDemo();
+    setMemories(res.data);
+  }, []);
+
+  const restoreMemories = useCallback(async () => {
+    const res = await memoryService.restoreDefaults();
+    setMemories(res.data);
+  }, []);
+
+  return {
+    memories,
+    loading,
+    error,
+    addMemory,
+    deleteMemory,
+    clearMemories,
+    restoreMemories,
+    refresh: fetchMemories,
+  };
 }

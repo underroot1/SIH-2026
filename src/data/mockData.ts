@@ -11,6 +11,92 @@ export const LANGUAGES: { code: Language; label: string; nativeLabel: string }[]
 ];
 
 export type TextScale = 1 | 2 | 3 | 4;
+
+export type CareCondition = 'dementia' | 'parkinsons' | 'stroke' | 'mci' | 'healthy_aging';
+
+export interface ConditionInfo {
+  id: CareCondition;
+  title: string;
+  tagline: string;
+  description: string;
+  badge: string;
+  iconName: 'Brain' | 'Activity' | 'HeartPulse' | 'Sparkles' | 'Sun';
+  color: string;
+  tips: string[];
+}
+
+export const CONDITIONS: ConditionInfo[] = [
+  {
+    id: 'dementia',
+    title: 'Dementia & Alzheimer’s Support',
+    tagline: 'Memory reassurance, gentle routines, and familiar family faces.',
+    description: 'Specialized for memory loss, confusion, and anxiety. Focuses on safe daily rhythms and photo recognition.',
+    badge: 'Memory & Reassurance',
+    iconName: 'Brain',
+    color: 'honey',
+    tips: [
+      'Speak in short, reassuring sentences with loving tone.',
+      'Maintain consistent daily meal and medication timings.',
+      'Review family photos together to stimulate positive emotional memories.',
+    ],
+  },
+  {
+    id: 'parkinsons',
+    title: 'Parkinson’s Disease & Mobility',
+    tagline: 'Strict medication alarms, motor support, and tremor-friendly touch.',
+    description: 'Optimized for Parkinson’s care with dopamine/levodopa exact-time alarms, hydration prompts, and high-contrast large buttons.',
+    badge: 'Motor & Timing Precision',
+    iconName: 'Activity',
+    color: 'teal',
+    tips: [
+      'Punctual medicine timing is vital for "on/off" motor control.',
+      'Encourage gentle stretching and hydration before meals.',
+      'Use large button interface to ease interaction during tremors.',
+    ],
+  },
+  {
+    id: 'stroke',
+    title: 'Post-Stroke & Aphasia Recovery',
+    tagline: 'Visual communication cards, speech recovery, and cognitive rebuilding.',
+    description: 'Designed for stroke survivors recovering speech and motor skills, featuring pictorial flashcards and daily speech exercises.',
+    badge: 'Speech & Cognitive Rehab',
+    iconName: 'HeartPulse',
+    color: 'coral',
+    tips: [
+      'Allow extra time for responses without finishing sentences.',
+      'Use picture cards to communicate wants and feelings.',
+      'Celebrate small daily milestones in routine tasks.',
+    ],
+  },
+  {
+    id: 'mci',
+    title: 'Mild Cognitive Impairment (MCI)',
+    tagline: 'Mental sharpness, daily task lists, and active independence.',
+    description: 'For seniors experiencing early memory shifts who want to stay active, independent, and intellectually engaged.',
+    badge: 'Sharpness & Autonomy',
+    iconName: 'Sparkles',
+    color: 'amber',
+    tips: [
+      'Encourage daily puzzle games and memory recall.',
+      'Promote independent completion of daily checklists.',
+      'Stay socially active and maintain outdoor walks.',
+    ],
+  },
+  {
+    id: 'healthy_aging',
+    title: 'Senior Living & Loneliness Support',
+    tagline: 'Social check-ins, family calls, hydration, and wellbeing.',
+    description: 'A comforting digital companion for elderly individuals to stay connected with family, take vitamins, and feel loved.',
+    badge: 'Wellness & Connection',
+    iconName: 'Sun',
+    color: 'sage',
+    tips: [
+      'Schedule regular family calls and video visits.',
+      'Set reminders for daily water intake and light walks.',
+      'Encourage sharing life stories and favorite songs.',
+    ],
+  },
+];
 export interface Reminder {
   id: string;
   type: 'medicine' | 'meal' | 'appointment' | 'activity' | 'call' | 'task';

@@ -8,6 +8,7 @@ interface UseRemindersResult {
   error: string | null;
   completeReminder: (id: string) => void;
   addReminder: (reminder: Omit<Reminder, 'id' | 'done'>) => void;
+  deleteReminder: (id: string) => Promise<void>;
   refresh: () => void;
 }
 
@@ -39,7 +40,6 @@ export function useReminders(): UseRemindersResult {
 
   const completeReminder = useCallback((id: string) => {
     setReminders((rs) => rs.map((r) => (r.id === id ? { ...r, done: true } : r)));
-    // Fire-and-forget — backend team can await this when real API is ready
     reminderService.complete(id);
   }, []);
 
@@ -49,5 +49,18 @@ export function useReminders(): UseRemindersResult {
     });
   }, []);
 
-  return { reminders, loading, error, completeReminder, addReminder, refresh: fetchReminders };
+  const deleteReminder = useCallback(async (id: string) => {
+    await reminderService.delete(id);
+    setReminders((rs) => rs.filter((r) => r.id !== id));
+  }, []);
+
+  return {
+    reminders,
+    loading,
+    error,
+    completeReminder,
+    addReminder,
+    deleteReminder,
+    refresh: fetchReminders,
+  };
 }

@@ -14,6 +14,7 @@ import { OnboardingPage } from '@/pages/OnboardingPage';
 import { CaregiverDashboardPage } from '@/pages/CaregiverDashboardPage';
 import { DemoPage } from '@/pages/DemoPage';
 import { AuthGateModal } from '@/components/AuthGateModal';
+import { CookieBanner } from '@/components/CookieBanner';
 
 function AppRouter() {
   const { route, authLoading } = useApp();
@@ -58,6 +59,8 @@ function AppRouter() {
       {renderPage()}
       {/* Auth gate modal renders globally above all pages */}
       <AuthGateModal />
+      {/* Cookie & data storage compliance banner */}
+      <CookieBanner />
     </>
   );
 }

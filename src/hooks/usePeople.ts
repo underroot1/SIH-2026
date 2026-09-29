@@ -6,7 +6,10 @@ interface UsePeopleResult {
   people: Person[];
   loading: boolean;
   error: string | null;
-  addPerson: (person: Omit<Person, 'id'>) => void;
+  addPerson: (person: Omit<Person, 'id'>) => Promise<void>;
+  deletePerson: (id: string) => Promise<void>;
+  clearPeople: () => Promise<void>;
+  restorePeople: () => Promise<void>;
   refresh: () => void;
 }
 
@@ -36,11 +39,34 @@ export function usePeople(): UsePeopleResult {
     fetchPeople();
   }, [fetchPeople]);
 
-  const addPerson = useCallback((person: Omit<Person, 'id'>) => {
-    peopleService.create(person).then((res) => {
-      if (res.data) setPeople((ps) => [...ps, res.data]);
-    });
+  const addPerson = useCallback(async (person: Omit<Person, 'id'>) => {
+    const res = await peopleService.create(person);
+    if (res.data) setPeople((ps) => [...ps, res.data]);
   }, []);
 
-  return { people, loading, error, addPerson, refresh: fetchPeople };
+  const deletePerson = useCallback(async (id: string) => {
+    await peopleService.delete(id);
+    setPeople((ps) => ps.filter((p) => p.id !== id));
+  }, []);
+
+  const clearPeople = useCallback(async () => {
+    const res = await peopleService.clearDemo();
+    setPeople(res.data);
+  }, []);
+
+  const restorePeople = useCallback(async () => {
+    const res = await peopleService.restoreDefaults();
+    setPeople(res.data);
+  }, []);
+
+  return {
+    people,
+    loading,
+    error,
+    addPerson,
+    deletePerson,
+    clearPeople,
+    restorePeople,
+    refresh: fetchPeople,
+  };
 }
