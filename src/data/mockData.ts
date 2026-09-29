@@ -126,12 +126,19 @@ export interface Person {
   phone: string;
 }
 
+export type GameCategory = 'memory' | 'motor' | 'speech' | 'focus' | 'zen';
+
 export interface Game {
   id: string;
   title: string;
   description: string;
   icon: string;
   gradient: string;
+  category: GameCategory;
+  categoryLabel: string;
+  conditionTarget?: 'dementia' | 'parkinsons' | 'stroke' | 'mci' | 'healthy_aging' | 'all';
+  recommendedFor: string;
+  benefit: string;
 }
 
 export interface Patient {
@@ -271,25 +278,133 @@ export const mockPeople: Person[] = [
 ];
 
 export const mockGames: Game[] = [
+  // Category 1: Memory & Reminiscence (Dementia / Alzheimer's)
   {
     id: 'g1',
     title: 'Picture Matching',
-    description: 'Match the pictures together.',
+    description: 'Find matching pairs of gentle nature and animal cards.',
     icon: 'puzzle',
     gradient: 'from-honey-300 to-honey-500',
+    category: 'memory',
+    categoryLabel: 'Memory & Recall',
+    conditionTarget: 'dementia',
+    recommendedFor: 'Alzheimer’s & Dementia',
+    benefit: 'Visual association & working memory stimulation',
   },
   {
     id: 'g2',
     title: 'Familiar Faces',
-    description: 'Can you recognize the people you know?',
+    description: 'Recognize and remember cherished family members and friends.',
     icon: 'users',
     gradient: 'from-sage-300 to-sage-500',
+    category: 'memory',
+    categoryLabel: 'Memory & Recall',
+    conditionTarget: 'dementia',
+    recommendedFor: 'Alzheimer’s & Dementia',
+    benefit: 'Long-term social connection & emotional grounding',
   },
+
+  // Category 2: Motor Control & Tremor Pacing (Parkinson's)
   {
     id: 'g3',
-    title: 'Memory Puzzle',
-    description: 'Complete the picture.',
+    title: 'Steady Rhythm Tap',
+    description: 'Tap gently on the pulsing circle to maintain steady motor cadence.',
+    icon: 'activity',
+    gradient: 'from-amber-300 to-amber-500',
+    category: 'motor',
+    categoryLabel: 'Motor & Rhythm',
+    conditionTarget: 'parkinsons',
+    recommendedFor: 'Parkinson’s Disease',
+    benefit: 'Tremor regulation, pacing & fine-motor coordination',
+  },
+  {
+    id: 'g4',
+    title: 'Peaceful Bubble Catch',
+    description: 'Tap slow-floating gentle bubbles with forgiving, tremor-safe buttons.',
+    icon: 'sparkles',
+    gradient: 'from-teal-300 to-teal-500',
+    category: 'motor',
+    categoryLabel: 'Motor & Rhythm',
+    conditionTarget: 'parkinsons',
+    recommendedFor: 'Parkinson’s Disease',
+    benefit: 'Hand-eye coordination without stress or rush',
+  },
+
+  // Category 3: Speech & Word Recovery (Post-Stroke & Aphasia)
+  {
+    id: 'g5',
+    title: 'Word & Object Connect',
+    description: 'Name everyday objects like tea, books, and water with gentle cues.',
+    icon: 'messageSquare',
+    gradient: 'from-sky-300 to-sky-500',
+    category: 'speech',
+    categoryLabel: 'Speech & Words',
+    conditionTarget: 'stroke',
+    recommendedFor: 'Post-Stroke & Aphasia',
+    benefit: 'Word-finding, lexical recall & expressive speech recovery',
+  },
+  {
+    id: 'g6',
+    title: 'Sentence Companion',
+    description: 'Complete heartwarming daily sentences using simple pictorial words.',
+    icon: 'volume2',
+    gradient: 'from-indigo-300 to-indigo-500',
+    category: 'speech',
+    categoryLabel: 'Speech & Words',
+    conditionTarget: 'stroke',
+    recommendedFor: 'Post-Stroke & Aphasia',
+    benefit: 'Language syntax rebuilding and verbal confidence',
+  },
+
+  // Category 4: Focus & Daily Logic (Mild Cognitive Impairment - MCI)
+  {
+    id: 'g7',
+    title: 'Daily Item Sorting',
+    description: 'Place common household items into their rightful rooms.',
     icon: 'palette',
     gradient: 'from-coral-300 to-coral-500',
+    category: 'focus',
+    categoryLabel: 'Focus & Daily Logic',
+    conditionTarget: 'mci',
+    recommendedFor: 'Mild Cognitive Impairment',
+    benefit: 'Executive functioning & daily life categorization',
+  },
+  {
+    id: 'g8',
+    title: 'Morning Routine Order',
+    description: 'Arrange daily morning steps in their natural, calming order.',
+    icon: 'puzzle',
+    gradient: 'from-violet-300 to-violet-500',
+    category: 'focus',
+    categoryLabel: 'Focus & Daily Logic',
+    conditionTarget: 'mci',
+    recommendedFor: 'Mild Cognitive Impairment',
+    benefit: 'Sequential planning & episodic daily memory',
+  },
+
+  // Category 5: Zen & Vitality (Active Senior Living / Healthy Aging)
+  {
+    id: 'g9',
+    title: 'Zen Flower Bloom',
+    description: 'Tap colorful petals to bloom serene flowers with uplifting thoughts.',
+    icon: 'sparkles',
+    gradient: 'from-emerald-300 to-emerald-500',
+    category: 'zen',
+    categoryLabel: 'Zen & Vitality',
+    conditionTarget: 'healthy_aging',
+    recommendedFor: 'Active Senior Living',
+    benefit: 'Stress reduction, color harmony & peaceful mindfulness',
+  },
+  {
+    id: 'g10',
+    title: 'Serene Breathing Circle',
+    description: 'Follow the gentle expanding ring for mindful, soothing breathing.',
+    icon: 'activity',
+    gradient: 'from-rose-300 to-rose-500',
+    category: 'zen',
+    categoryLabel: 'Zen & Vitality',
+    conditionTarget: 'healthy_aging',
+    recommendedFor: 'Active Senior Living',
+    benefit: 'Autonomic nervous relaxation & mental clarity',
   },
 ];

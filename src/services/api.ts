@@ -270,7 +270,7 @@ export const gameService = {
       if (!isSupabaseConfigured) return { data: mockGames, error: null };
       const { data, error } = await supabase
         .from('games')
-        .select('id, title, description, icon, gradient')
+        .select('id, title, description, icon, gradient, category, categoryLabel, conditionTarget, recommendedFor, benefit')
         .order('created_at', { ascending: true });
 
       if (error || !data || data.length === 0) {
