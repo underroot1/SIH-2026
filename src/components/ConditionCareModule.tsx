@@ -66,11 +66,11 @@ export function ConditionCareModule() {
 
   return (
     <div className="mb-8 animate-scaleIn">
-      {/* Condition Switcher Bar for Reviewers & Caregivers */}
+      {/* Condition label + caregiver link */}
       <div className="flex items-center justify-between gap-2 mb-3 px-1">
         <div className="flex items-center gap-1.5 text-xs text-ink-500 font-bold uppercase tracking-wider">
           <span className="w-2 h-2 rounded-full bg-honey-500 animate-pulse" />
-          <span>Tailored Care Focus:</span>
+          <span>Care Mode:</span>
           <span className="text-honey-700 bg-honey-100 px-2.5 py-0.5 rounded-full">{currentCondition.title.split('&')[0]}</span>
         </div>
         <button
@@ -91,29 +91,29 @@ export function ConditionCareModule() {
               </div>
               <div>
                 <h2 className="text-xl font-display font-extrabold text-ink-900 leading-tight">
-                  Parkinson's Motor & Timing Hub
+                  Movement & Medicine
                 </h2>
                 <p className="text-sm text-teal-800 font-semibold">
-                  Strict On/Off Medication Window & Tremor-Safe Controls
+                  Your medicine times and gentle movement reminders
                 </p>
               </div>
             </div>
             <span className="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full bg-teal-100 text-teal-900 font-bold text-xs uppercase tracking-wider">
-              <Shield className="w-3.5 h-3.5" /> High-Precision Timing
+              <Shield className="w-3.5 h-3.5" /> On Time
             </span>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-3 mb-4">
             <div className="bg-white p-4 rounded-2xl border border-teal-200">
-              <p className="text-xs font-bold text-teal-700 uppercase tracking-wider">Next Levodopa / Dopamine Window</p>
+              <p className="text-xs font-bold text-teal-700 uppercase tracking-wider">Next Medicine</p>
               <p className="text-2xl font-display font-extrabold text-ink-900 mt-0.5">12:30 PM</p>
-              <p className="text-xs text-ink-400 mt-1">Punctual intake prevents motor stiffness and tremors.</p>
+              <p className="text-xs text-ink-400 mt-1">Take on time to feel your best.</p>
             </div>
             <div className="bg-white p-4 rounded-2xl border border-teal-200 flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-teal-700 uppercase tracking-wider">Hydration & Mobility</p>
+                <p className="text-xs font-bold text-teal-700 uppercase tracking-wider">Water Today</p>
                 <p className="text-2xl font-display font-extrabold text-ink-900 mt-0.5">{waterCount} / 6 Glasses</p>
-                <p className="text-xs text-ink-400 mt-1">Adequate hydration eases blood pressure fluctuations.</p>
+                <p className="text-xs text-ink-400 mt-1">Tap to log a glass of water.</p>
               </div>
               <button
                 onClick={handleWater}
@@ -127,11 +127,11 @@ export function ConditionCareModule() {
 
           {/* Tremor-friendly large tap action */}
           <button
-            onClick={() => handleSpeech('Gentle Movement', 'Let us do a gentle two-minute seated arm and leg stretch to keep muscles relaxed.')}
+            onClick={() => handleSpeech('Gentle movement', 'Let us do a gentle two-minute seated arm and leg stretch to keep your muscles relaxed.')}
             className="w-full bg-white hover:bg-teal-50 border-2 border-teal-400 text-teal-900 font-extrabold py-4 px-5 rounded-2xl flex items-center justify-center gap-3 text-lg transition shadow-xs active:scale-98"
           >
             <Activity className="w-6 h-6 text-teal-600" />
-            <span>Start 2-Minute Gentle Mobility Stretch</span>
+            <span>Start Gentle 2-Minute Stretch</span>
           </button>
         </div>
       )}
@@ -146,10 +146,10 @@ export function ConditionCareModule() {
               </div>
               <div>
                 <h2 className="text-xl font-display font-extrabold text-ink-900 leading-tight">
-                  Visual Speech Board (Tap to Speak)
+                  Tap to Speak
                 </h2>
                 <p className="text-sm text-coral-800 font-semibold">
-                  One-tap spoken communication cards for speech recovery & aphasia
+                  These cards speak for you — just tap one
                 </p>
               </div>
             </div>
@@ -199,10 +199,10 @@ export function ConditionCareModule() {
               </div>
               <div>
                 <h2 className="text-xl font-display font-extrabold text-ink-900 leading-tight">
-                  Daily Sharpness & Independence Checklist
+                  Today's Tasks
                 </h2>
                 <p className="text-sm text-amber-800 font-semibold">
-                  Promotes active cognitive training & senior autonomy
+                  Tap each task when done — you're doing great!
                 </p>
               </div>
             </div>
@@ -248,10 +248,10 @@ export function ConditionCareModule() {
               </div>
               <div>
                 <h2 className="text-xl font-display font-extrabold text-ink-900 leading-tight">
-                  Family Connection & Joy Corner
+                  Stay Connected
                 </h2>
                 <p className="text-sm text-sage-800 font-semibold">
-                  Staying socially engaged and feeling loved every day
+                  Your family is close — reach out anytime
                 </p>
               </div>
             </div>
@@ -266,8 +266,8 @@ export function ConditionCareModule() {
                 <Phone className="w-6 h-6 text-sage-600" />
               </div>
               <div>
-                <p className="font-bold text-ink-900 text-base">Speed-Dial Family</p>
-                <p className="text-xs text-ink-400">One touch to call daughter or son</p>
+                <p className="font-bold text-ink-900 text-base">Call Family</p>
+                <p className="text-xs text-ink-400">Tap to call your daughter or son</p>
               </div>
             </button>
 
@@ -304,10 +304,10 @@ export function ConditionCareModule() {
               </div>
               <div>
                 <h2 className="text-xl font-display font-extrabold text-ink-900 leading-tight">
-                  You are safe and cherished. 🌿
+                  You are safe. 🌿
                 </h2>
                 <p className="text-sm text-honey-800 font-semibold">
-                  Your family, home, and caregivers are with you every step of the day.
+                  Your family and helpers are right here with you.
                 </p>
               </div>
             </div>

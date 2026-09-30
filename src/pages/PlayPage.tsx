@@ -81,8 +81,8 @@ export function PlayPage() {
   return (
     <div className="max-w-4xl mx-auto pb-12">
       <PageHeader
-        title="Play & Exercise Your Mind"
-        subtitle="Explore therapeutic games across all categories for memory, motor, speech, and peace."
+        title="Let's Play"
+        subtitle="Choose a game and have fun."
         icon={
           <div className="w-12 h-12 rounded-2xl bg-sage-100 flex items-center justify-center">
             <Sparkles className="w-7 h-7 text-sage-600" />
@@ -178,22 +178,13 @@ export function PlayPage() {
             </div>
           </div>
 
-          {/* Condition-tailored prompt if user has active condition */}
+          {/* Condition-tailored note if user has active condition */}
           {careCondition && careCondition !== 'dementia' && selectedCategory === 'all' && (
-            <div className="card-base p-4 mb-6 bg-gradient-to-r from-sage-50 to-cream-100 border border-sage-200 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-sage-200 flex items-center justify-center text-sage-800 shrink-0">
-                  <Heart className="w-5 h-5 fill-sage-600" />
-                </div>
-                <div>
-                  <p className="font-extrabold text-ink-800 text-sm sm:text-base">
-                    Therapeutic Activities Tailored For Your Care Focus
-                  </p>
-                  <p className="text-xs sm:text-sm text-ink-500">
-                    Switch between all categories above or enjoy the targeted exercises below.
-                  </p>
-                </div>
-              </div>
+            <div className="card-base p-4 mb-6 bg-gradient-to-r from-sage-50 to-cream-100 border border-sage-200 flex items-center gap-3">
+              <Heart className="w-6 h-6 text-sage-600 fill-sage-200 shrink-0" />
+              <p className="font-bold text-ink-700 text-sm sm:text-base">
+                Games are tailored to your care needs — explore any category or try your recommended ones.
+              </p>
             </div>
           )}
 

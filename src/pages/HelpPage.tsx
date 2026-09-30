@@ -1,52 +1,71 @@
 import { useApp } from '@/context/AppContext';
 import { PageHeader } from '@/components/UI';
-import { Phone, UserCog, Volume2, ArrowLeft, ShieldCheck, HeartPulse } from 'lucide-react';
+import { Phone, UserCog, Volume2, ShieldCheck, HeartPulse } from 'lucide-react';
 import { useState } from 'react';
 
-export function HelpPage() {
-  const { goBack, careCondition } = useApp();
-  const [speechNotice, setSpeechNotice] = useState<string | null>(null);
+const REASSURANCE: Record<string, { title: string; body: string }> = {
+  dementia:      { title: 'You are safe. 🌿', body: 'Your family and helpers are here.' },
+  parkinsons:    { title: 'Take your time. 🌿', body: 'Sit comfortably. Help is close by.' },
+  stroke:        { title: 'You are understood. 🌿', body: 'Tap any card below to speak for you.' },
+  mci:           { title: 'All is well. 🌿', body: 'Your family is just one tap away.' },
+  healthy_aging: { title: 'You are loved. 🌿', body: 'Your family and helpers are near.' },
+};
 
-  const handleReadAloud = (text: string) => {
-    setSpeechNotice(text);
+const HELP_ACTIONS = [
+  {
+    id: 'family',
+    label: 'Call My Family',
+    sub: 'Talk to someone who loves you.',
+    icon: Phone,
+    color: 'bg-sage-100 text-sage-600',
+    speech: 'Calling your family now. Someone who loves you will answer.',
+  },
+  {
+    id: 'caregiver',
+    label: 'Call My Helper',
+    sub: 'Your caregiver will come.',
+    icon: UserCog,
+    color: 'bg-honey-100 text-honey-600',
+    speech: 'Contacting your caregiver. They are on their way.',
+  },
+  {
+    id: 'read',
+    label: 'Read This Aloud',
+    sub: 'Hear calming words.',
+    icon: Volume2,
+    color: 'bg-coral-100 text-coral-600',
+    speech: null, // built dynamically below
+  },
+];
+
+const STROKE_CARDS = [
+  { label: 'Need Help',  text: 'I need help right now, please.' },
+  { label: 'Feeling Pain', text: 'I am in pain.' },
+  { label: 'Need Water', text: 'I need water, please.' },
+  { label: 'Call Family', text: 'Please call my family.' },
+];
+
+export function HelpPage() {
+  const { careCondition } = useApp();
+  const [speaking, setSpeaking] = useState<string | null>(null);
+
+  const reassurance = REASSURANCE[careCondition] ?? REASSURANCE.dementia;
+
+  const speak = (text: string, label: string) => {
+    setSpeaking(label);
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.9;
+      window.speechSynthesis.speak(u);
     }
-    setTimeout(() => setSpeechNotice(null), 3000);
+    setTimeout(() => setSpeaking(null), 3000);
   };
-
-  const reassuranceTitles: Record<string, { title: string; subtitle: string }> = {
-    dementia: {
-      title: 'You are safe. 🌿',
-      subtitle: 'Your family and caregivers are right here to help you.',
-    },
-    parkinsons: {
-      title: 'Take your time. 🌿',
-      subtitle: 'Sit down comfortably. Medication and physical help are readily available.',
-    },
-    stroke: {
-      title: 'You are understood. 🌿',
-      subtitle: 'Tap any speech card below or call your family with one touch.',
-    },
-    mci: {
-      title: 'Everything is in order. 🌿',
-      subtitle: 'Your routine and family contacts are always right beside you.',
-    },
-    healthy_aging: {
-      title: 'You are loved and never alone. 🌿',
-      subtitle: 'Your family and caregivers are only one touch away.',
-    },
-  };
-
-  const currentReassurance = reassuranceTitles[careCondition] || reassuranceTitles.dementia;
 
   return (
     <div className="max-w-2xl mx-auto">
       <PageHeader
-        title="Do You Need Help?"
+        title="I Need Help"
         icon={
           <div className="w-12 h-12 rounded-2xl bg-coral-100 flex items-center justify-center">
             <ShieldCheck className="w-7 h-7 text-coral-600" />
@@ -55,90 +74,65 @@ export function HelpPage() {
         showBack={false}
       />
 
-      {/* Condition-specific reassurance banner */}
-      <div className="card-base p-6 mb-6 bg-sage-50 border-2 border-sage-200 text-center animate-fadeIn">
-        <p className="text-2xl font-display font-extrabold text-sage-700 mb-1">
-          {currentReassurance.title}
-        </p>
-        <p className="text-lg text-sage-600">{currentReassurance.subtitle}</p>
+      {/* Reassurance banner */}
+      <div className="card-base p-6 mb-6 bg-sage-50 border-2 border-sage-200 text-center">
+        <p className="text-2xl font-display font-extrabold text-sage-700 mb-1">{reassurance.title}</p>
+        <p className="text-lg text-sage-600">{reassurance.body}</p>
       </div>
 
-      {speechNotice && (
-        <div className="mb-4 bg-coral-500 text-white font-bold text-center py-2 px-4 rounded-xl text-base animate-pulse">
-          Reading: {speechNotice}
+      {/* Speaking notice */}
+      {speaking && (
+        <div className="mb-4 bg-coral-500 text-white font-bold text-center py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 animate-pulse">
+          <Volume2 className="w-5 h-5" />
+          <span>Speaking: {speaking}</span>
         </div>
       )}
 
-      {/* Special Aphasia / Stroke Quick Help Cards */}
+      {/* Stroke quick-speak cards */}
       {careCondition === 'stroke' && (
         <div className="card-base p-5 mb-6 border-2 border-coral-200 bg-coral-50/40">
           <p className="font-bold text-ink-800 text-base mb-3 flex items-center gap-1.5">
-            <HeartPulse className="w-5 h-5 text-coral-600" /> Quick Spoken Emergency Words:
+            <HeartPulse className="w-5 h-5 text-coral-600" />
+            Tap to speak
           </p>
           <div className="grid grid-cols-2 gap-2.5">
-            {[
-              { label: 'Need Help Now', text: 'I need help right now, please.' },
-              { label: 'Feeling Pain', text: 'I am experiencing pain.' },
-              { label: 'Need Water', text: 'I need a glass of water.' },
-              { label: 'Call Daughter / Son', text: 'Please call my family immediately.' },
-            ].map((btn) => (
+            {STROKE_CARDS.map((c) => (
               <button
-                key={btn.label}
-                onClick={() => handleReadAloud(btn.text)}
-                className="p-3 bg-white rounded-xl border border-coral-200 text-left hover:border-coral-400 font-bold text-ink-900 text-sm active:scale-95 shadow-xs"
+                key={c.label}
+                onClick={() => speak(c.text, c.label)}
+                className="p-3 bg-white rounded-xl border border-coral-200 hover:border-coral-400 font-bold text-ink-900 text-sm text-left active:scale-95 shadow-xs"
               >
-                {btn.label}
+                {c.label}
               </button>
             ))}
           </div>
         </div>
       )}
 
+      {/* Main help buttons */}
       <div className="grid grid-cols-1 gap-4">
-        <button
-          onClick={() => handleReadAloud('Calling your family now. Someone who loves you will answer.')}
-          className="card-base card-hover p-6 flex items-center gap-5 text-left group"
-        >
-          <div className="w-16 h-16 rounded-2xl bg-sage-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition">
-            <Phone className="w-9 h-9 text-sage-600" />
-          </div>
-          <div>
-            <p className="font-display font-extrabold text-ink-800 text-2xl">Call My Family</p>
-            <p className="text-ink-500 text-lg">Talk to someone you love right now.</p>
-          </div>
-        </button>
-
-        <button
-          onClick={() => handleReadAloud('Contacting your caregiver. They are on their way to help.')}
-          className="card-base card-hover p-6 flex items-center gap-5 text-left group"
-        >
-          <div className="w-16 h-16 rounded-2xl bg-honey-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition">
-            <UserCog className="w-9 h-9 text-honey-600" />
-          </div>
-          <div>
-            <p className="font-display font-extrabold text-ink-800 text-2xl">Contact My Caregiver</p>
-            <p className="text-ink-500 text-lg">Reach the person dedicated to assisting you.</p>
-          </div>
-        </button>
-
-        <button
-          onClick={() => handleReadAloud(`You are looking at the Help Screen. ${currentReassurance.title} ${currentReassurance.subtitle} You can press Call My Family or Contact Caregiver anytime.`)}
-          className="card-base card-hover p-6 flex items-center gap-5 text-left group"
-        >
-          <div className="w-16 h-16 rounded-2xl bg-coral-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition">
-            <Volume2 className="w-9 h-9 text-coral-600" />
-          </div>
-          <div>
-            <p className="font-display font-extrabold text-ink-800 text-2xl">Read This Screen Aloud</p>
-            <p className="text-ink-500 text-lg">Listen to reassuring words in a calm voice.</p>
-          </div>
-        </button>
+        {HELP_ACTIONS.map((action) => {
+          const Icon = action.icon;
+          const text =
+            action.speech ??
+            `You are on the Help screen. ${reassurance.title} ${reassurance.body} You can press Call My Family or Call My Helper anytime.`;
+          return (
+            <button
+              key={action.id}
+              onClick={() => speak(text, action.label)}
+              className="card-base card-hover p-6 flex items-center gap-5 text-left group"
+            >
+              <div className={`w-16 h-16 rounded-2xl ${action.color} flex items-center justify-center shrink-0 group-hover:scale-110 transition`}>
+                <Icon className="w-9 h-9" />
+              </div>
+              <div>
+                <p className="font-display font-extrabold text-ink-800 text-2xl">{action.label}</p>
+                <p className="text-ink-500 text-lg">{action.sub}</p>
+              </div>
+            </button>
+          );
+        })}
       </div>
-
-      <button onClick={goBack} className="btn-secondary w-full mt-6 text-xl">
-        <ArrowLeft className="w-6 h-6" />
-        Go Back
-      </button>
     </div>
   );
 }

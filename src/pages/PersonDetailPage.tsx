@@ -9,40 +9,43 @@ export function PersonDetailPage() {
   const { people, error, refresh } = usePeople();
   const person = people.find((p) => p.id === selectedPersonId);
 
-  if (error) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <PageHeader title="My People" />
-        <ErrorState message={error} onRetry={refresh} />
-      </div>
-    );
-  }
+  const speak = () => {
+    if (!person || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(person.info);
+    u.rate = 0.88;
+    window.speechSynthesis.speak(u);
+  };
 
-  if (!person) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <PageHeader title="Person not found" />
-        <button onClick={goBack} className="btn-secondary">
-          <ArrowLeft className="w-6 h-6" />
-          Go Back
-        </button>
-      </div>
-    );
-  }
+  if (error) return (
+    <div className="max-w-4xl mx-auto">
+      <PageHeader title="My People" />
+      <ErrorState message={error} onRetry={refresh} />
+    </div>
+  );
+
+  if (!person) return (
+    <div className="max-w-4xl mx-auto">
+      <PageHeader title="Person not found" />
+      <button onClick={goBack} className="btn-secondary">
+        <ArrowLeft className="w-6 h-6" /> Go Back
+      </button>
+    </div>
+  );
 
   return (
     <div className="max-w-2xl mx-auto">
       <PageHeader title={person.name} subtitle={person.relationship} />
 
       <div className="card-base overflow-hidden animate-scaleIn">
-        {person.image && person.image.startsWith('data:') ? (
+        {person.image?.startsWith('data:') ? (
           <img src={person.image} alt={person.name} className="w-full aspect-square sm:aspect-[4/3] object-cover object-top" />
         ) : (
           <Illustration id={person.image} label={person.name} className="w-full aspect-square sm:aspect-[4/3]" rounded="rounded-none" />
         )}
 
         <div className="p-6 sm:p-8">
-          <p className="text-2xl font-display font-extrabold text-ink-800 mb-2">{person.name}</p>
+          <p className="text-2xl font-display font-extrabold text-ink-800 mb-1">{person.name}</p>
           <p className="text-xl text-honey-600 font-bold mb-4">{person.relationship}</p>
           <p className="text-xl text-ink-600 leading-relaxed mb-6">{person.info}</p>
 
@@ -51,7 +54,7 @@ export function PersonDetailPage() {
               <Phone className="w-7 h-7" />
               Call {person.name}
             </button>
-            <button className="btn-primary flex-1 text-xl">
+            <button onClick={speak} className="btn-primary flex-1 text-xl">
               <Volume2 className="w-7 h-7" />
               Listen
             </button>
